@@ -1,26 +1,248 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* Class-based dark mode (next-themes sets `.dark` on `<html>`) */
+@custom-variant dark (&:where(.dark, .dark *));
 
+/*
+  Theme tokens: `--exceflow-*` are swapped in `:root` vs `.dark`.
+  Tailwind maps semantic colors to these via @theme.
+*/
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+
+  --color-background: var(--exceflow-background);
+  --color-foreground: var(--exceflow-foreground);
+
+  --color-card: var(--exceflow-card);
+  --color-card-foreground: var(--exceflow-card-foreground);
+
+  --color-popover: var(--exceflow-popover);
+  --color-popover-foreground: var(--exceflow-popover-foreground);
+
+  --color-primary: var(--exceflow-primary);
+  --color-primary-foreground: var(--exceflow-primary-foreground);
+
+  --color-secondary: var(--exceflow-secondary);
+  --color-secondary-foreground: var(--exceflow-secondary-foreground);
+
+  --color-muted: var(--exceflow-muted);
+  --color-muted-foreground: var(--exceflow-muted-foreground);
+
+  --color-accent: var(--exceflow-accent);
+  --color-accent-foreground: var(--exceflow-accent-foreground);
+
+  --color-destructive: var(--exceflow-destructive);
+  --color-destructive-foreground: var(--exceflow-destructive-foreground);
+
+  --color-border: var(--exceflow-border);
+  --color-input: var(--exceflow-input);
+  --color-ring: var(--exceflow-ring);
+
+  --color-exceflow-header: var(--exceflow-shell-header-bg);
+  --color-exceflow-footer: var(--exceflow-shell-footer-bg);
+  --color-exceflow-bright-surface: var(--exceflow-bright-surface);
+  --color-exceflow-paper: var(--exceflow-paper-tint);
+  --color-exceflow-paper-faint: var(--exceflow-paper-faint);
+  --color-exceflow-hero: var(--exceflow-hero-text);
+  --color-exceflow-cta: var(--exceflow-cta);
+  --color-exceflow-cta-foreground: var(--exceflow-cta-foreground);
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  color-scheme: light;
+
+  /* design.html — light SaaS */
+  --exceflow-background: #f8fafc;
+  --exceflow-foreground: #0b1c30;
+
+  --exceflow-card: #ffffff;
+  --exceflow-card-foreground: #0b1c30;
+
+  --exceflow-popover: #ffffff;
+  --exceflow-popover-foreground: #0b1c30;
+
+  --exceflow-primary: #ae3200;
+  --exceflow-primary-foreground: #ffffff;
+
+  --exceflow-cta: #ff5a1f;
+  --exceflow-cta-foreground: #ffffff;
+
+  --exceflow-secondary: #5d5e61;
+  --exceflow-secondary-foreground: #ffffff;
+
+  --exceflow-muted: #eff4ff;
+  --exceflow-muted-foreground: #5b4038;
+
+  --exceflow-accent: #e5eeff;
+  --exceflow-accent-foreground: #0b1c30;
+
+  --exceflow-destructive: #ba1a1a;
+  --exceflow-destructive-foreground: #ffffff;
+
+  --exceflow-border: #e4beb3;
+  --exceflow-input: #e4beb3;
+  --exceflow-ring: #ff5a1f;
+
+  --exceflow-shell-header-bg: rgba(248, 249, 255, 0.92);
+  --exceflow-shell-footer-bg: #ffffff;
+  --exceflow-bright-surface: #f8f9ff;
+  --exceflow-paper-tint: #e5eeff;
+  --exceflow-paper-faint: rgba(11, 28, 48, 0.03);
+  --exceflow-hero-text: #0b1c30;
+
+  --exceflow-body-grad-1: transparent;
+  --exceflow-body-grad-2: transparent;
+  --exceflow-body-base-1: #f8fafc;
+  --exceflow-body-base-2: #f8fafc;
+
+  --exceflow-panel-mix-end: #dce9ff;
+  --exceflow-panel-shadow: rgba(11, 28, 48, 0.08);
+  --exceflow-panel-highlight: rgba(255, 255, 255, 0.8);
+}
+
+.dark {
+  color-scheme: dark;
+
+  --exceflow-background: #0e1114;
+  --exceflow-foreground: #e8eaed;
+
+  --exceflow-card: #151a1f;
+  --exceflow-card-foreground: #e8eaed;
+
+  --exceflow-popover: #151a1f;
+  --exceflow-popover-foreground: #e8eaed;
+
+  --exceflow-primary: #d4a27f;
+  --exceflow-primary-foreground: #1a120c;
+
+  --exceflow-secondary: #8fb8d4;
+  --exceflow-secondary-foreground: #0d1a22;
+
+  --exceflow-muted: #1e242c;
+  --exceflow-muted-foreground: #9aa3ae;
+
+  --exceflow-accent: #242b35;
+  --exceflow-accent-foreground: #e8eaed;
+
+  --exceflow-destructive: #e08580;
+  --exceflow-destructive-foreground: #1c0a09;
+
+  --exceflow-border: #2a323d;
+  --exceflow-input: #2a323d;
+  --exceflow-ring: #d4a27f;
+
+  --exceflow-cta: #ff5a1f;
+  --exceflow-cta-foreground: #ffffff;
+
+  --exceflow-shell-header-bg: rgba(18, 22, 28, 0.72);
+  --exceflow-shell-footer-bg: #0a0c0f;
+  --exceflow-bright-surface: #1e252e;
+  --exceflow-paper-tint: #f4efe6;
+  --exceflow-paper-faint: rgba(244, 239, 230, 0.04);
+  --exceflow-hero-text: #f4efe6;
+
+  --exceflow-body-grad-1: rgba(212, 162, 127, 0.07);
+  --exceflow-body-grad-2: rgba(143, 184, 212, 0.05);
+  --exceflow-body-base-1: #0e1114;
+  --exceflow-body-base-2: #0c0e11;
+
+  --exceflow-panel-mix-end: #0a0c0f;
+  --exceflow-panel-shadow: rgba(0, 0, 0, 0.55);
+  --exceflow-panel-highlight: rgba(244, 239, 230, 0.06);
+}
+
+@utility animate-exceflow-soft-pulse {
+  animation: exceflow-soft-pulse 2.8s ease-in-out infinite;
+}
+
+@keyframes exceflow-soft-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  ::selection {
+    background-color: var(--exceflow-cta);
+    color: var(--exceflow-cta-foreground);
+  }
+  body {
+    @apply min-h-screen bg-background font-sans text-foreground antialiased;
+    background-image:
+      radial-gradient(
+        ellipse 120% 80% at 50% -40%,
+        var(--exceflow-body-grad-1),
+        transparent 55%
+      ),
+      radial-gradient(
+        ellipse 90% 60% at 100% 0%,
+        var(--exceflow-body-grad-2),
+        transparent 50%
+      ),
+      linear-gradient(
+        180deg,
+        var(--exceflow-body-base-1) 0%,
+        var(--exceflow-body-base-2) 100%
+      );
+    background-attachment: fixed;
+  }
+}
+
+@layer components {
+  .exceflow-doc-panel {
+    background: linear-gradient(
+      165deg,
+      color-mix(in srgb, var(--color-card) 94%, var(--color-exceflow-paper)) 0%,
+      var(--color-card) 48%,
+      color-mix(
+          in srgb,
+          var(--color-card) 88%,
+          var(--exceflow-panel-mix-end)
+        )
+        100%
+    );
+    border: 1px solid color-mix(in srgb, var(--color-border) 85%, transparent);
+    box-shadow:
+      0 1px 0 var(--exceflow-panel-highlight),
+      0 24px 64px -32px var(--exceflow-panel-shadow);
+  }
+
+  .exceflow-upload-zone {
+    border: 1px dashed
+      color-mix(
+        in srgb,
+        var(--color-border) 75%,
+        var(--color-muted-foreground) 25%
+      );
+    background: color-mix(
+      in srgb,
+      var(--color-exceflow-paper-faint) 100%,
+      transparent
+    );
+    box-shadow: inset 0 1px 0
+      color-mix(in srgb, var(--color-exceflow-paper) 8%, transparent);
+  }
+  .exceflow-upload-zone--active {
+    border-color: color-mix(
+      in srgb,
+      var(--color-primary) 55%,
+      var(--color-border)
+    );
+    background: color-mix(in srgb, var(--color-primary) 6%, transparent);
+    box-shadow:
+      inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 12%, transparent),
+      0 0 0 3px color-mix(in srgb, var(--color-primary) 8%, transparent);
+  }
 }

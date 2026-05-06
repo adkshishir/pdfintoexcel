@@ -80,7 +80,10 @@ services:
   frontend:
     image: node:20-alpine
     working_dir: /app
-    command: sh -c "npm install --no-audit --no-fund && npm run dev -- -p 3000 -H 0.0.0.0"
+    # Use `npm ci` so node_modules (on the named volume below) always matches the
+    # lockfile after `package.json` changes. Plain `npm install` can leave stale
+    # volumes missing new deps (e.g. @radix-ui/react-dialog).
+    command: sh -c "npm ci --no-audit --no-fund && npm run dev -- -p 3000 -H 0.0.0.0"
     environment:
       # Hit nginx (port 8080) so /api routes through to the backend container.
       # For direct-to-backend development without nginx, override with
