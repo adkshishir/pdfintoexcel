@@ -12,7 +12,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'Exceflow PDF — PDF to Excel',
+  metadataBase: new URL('https://pdfintoexcel.com'),
+  title: 'PDF into Excel — pdfintoexcel.com',
   description:
     'Convert digital, scanned, and handwritten PDFs into structured Excel files.',
 };
