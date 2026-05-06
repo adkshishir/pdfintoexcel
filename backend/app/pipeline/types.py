@@ -92,7 +92,9 @@ class CleanTable:
 # Full-document content model (full_document extraction scope only)
 # ---------------------------------------------------------------------------
 
-ContentBlockKind = Literal["heading", "paragraph", "bullet", "key_value", "table"]
+ContentBlockKind = Literal[
+    "heading", "paragraph", "bullet", "key_value", "pre_table", "table"
+]
 
 
 @dataclass

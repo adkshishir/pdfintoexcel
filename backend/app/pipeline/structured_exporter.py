@@ -9,6 +9,7 @@ visual sections:
   │  Key         │ Value                 │
   ├──────────────────────────────────────┤
   │  (spacer)                            │
+  │  Body: pre-table lines (footer-style)│
   │  Body: heading / paragraph / bullet  │
   │  Body: inline table                  │
   │  ...                                 │
@@ -180,6 +181,8 @@ def _write_header_line(ws, row: int, line: str, n_cols: int, *, is_first: bool) 
 
 def _write_block(ws, block: ContentBlock, row: int, n_cols: int) -> int:
     """Write a single ContentBlock and return the next available row."""
+    if block.kind == "pre_table":
+        return _write_pre_table_block(ws, block, row, n_cols)
     if block.kind == "heading":
         return _write_heading_block(ws, block, row, n_cols)
     if block.kind == "key_value":
@@ -189,6 +192,19 @@ def _write_block(ws, block: ContentBlock, row: int, n_cols: int) -> int:
     if block.kind == "table":
         return _write_table_block(ws, block, row, n_cols)
     return row
+
+
+def _write_pre_table_block(ws, block: ContentBlock, row: int, n_cols: int) -> int:
+    """Letterhead / intro above the first table — line-by-line like the footer section."""
+    for line in block.lines:
+        stripped = line.strip()
+        if not stripped:
+            continue
+        _write_merged(ws, row, stripped, n_cols,
+                      font=_ITALIC_GRAY, alignment=_WRAP_ALIGN)
+        ws.row_dimensions[row].height = 14
+        row += 1
+    return row + 1
 
 
 def _write_heading_block(ws, block: ContentBlock, row: int, n_cols: int) -> int:
