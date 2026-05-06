@@ -1,0 +1,31 @@
+# env
+.env
+.env.local
+.env.*.local
+infrastructure/.env.prod
+
+# python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# node — frontend has its own .gitignore; this catches stragglers if devs
+# install at the root.
+node_modules/
+
+# storage / runtime
+storage/
+*.sqlite
+*.log
+
+# ide
+.vscode/
+.idea/
+
+# os
+.DS_Store

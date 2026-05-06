@@ -1,0 +1,67 @@
+# Production overlay. Use with the base compose file:
+#
+#   docker compose \
+#     -f infrastructure/docker-compose.yml \
+#     -f infrastructure/docker-compose.prod.yml \
+#     up -d --build
+#
+# Differences from the base (dev) compose:
+#   - frontend uses its own production Dockerfile (no live source mount,
+#     no `npm install` on every boot)
+#   - all services restart unless explicitly stopped
+#   - no port mapping for backend/frontend — only nginx is reachable from outside
+#   - reads secrets from `infrastructure/.env.prod` (not committed)
+#
+# Provide `infrastructure/.env.prod` based on `backend/.env.example`. At
+# minimum override:
+#   STORAGE_BACKEND=oracle
+#   ORACLE_ENDPOINT=...
+#   ORACLE_REGION=...
+#   ORACLE_ACCESS_KEY=...
+#   ORACLE_SECRET_KEY=...
+#   STORAGE_BUCKET=...
+
+services:
+  postgres:
+    restart: unless-stopped
+    env_file:
+      - .env.prod
+
+  redis:
+    restart: unless-stopped
+
+  backend:
+    restart: unless-stopped
+    env_file:
+      - .env.prod
+    ports: !reset []     # no external port — nginx fronts it
+
+  worker:
+    restart: unless-stopped
+    env_file:
+      - .env.prod
+
+  frontend:
+    image: ${FRONTEND_IMAGE:-pdf-excel-converter-frontend:latest}
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE_URL: /api
+    command: !reset null   # use the image's CMD (next start), not the dev override
+    volumes: !reset []     # no source mount in prod
+    restart: unless-stopped
+    ports: !reset []
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: /api
+
+  nginx:
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    # TLS termination: replace with port 443 + mounted certs from your provider.
+    # Example (uncomment when adding):
+    # ports:
+    #   - "443:443"
+    # volumes:
+    #   - /etc/letsencrypt/live/<domain>:/etc/nginx/certs:ro

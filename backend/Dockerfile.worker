@@ -1,0 +1,38 @@
+# Celery worker image.
+# Heavier than the API image: needs Tesseract, Poppler, libGL (OpenCV/Camelot),
+# and the PaddleOCR wheel. The API image stays lean.
+FROM python:3.11-slim AS base
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        # libmagic — file-type sniffing (shared with API)
+        libmagic1 \
+        # Tesseract OCR + English data
+        tesseract-ocr \
+        tesseract-ocr-eng \
+        # Poppler — required by Camelot (pdftotext / pdfinfo)
+        poppler-utils \
+        # OpenCV runtime libs (libGL, libGthread) — pulled in by paddleocr
+        libgl1 \
+        libglib2.0-0 \
+        # Build tools needed by some pip wheels
+        gcc \
+        curl \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY requirements.txt ./
+RUN pip install --upgrade pip && pip install -r requirements.txt
+
+COPY app ./app
+COPY alembic ./alembic
+COPY alembic.ini ./alembic.ini
+COPY scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+CMD ["celery", "-A", "app.queue.celery_app", "worker", "--loglevel=INFO"]

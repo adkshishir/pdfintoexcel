@@ -1,0 +1,111 @@
+# Run: docker compose -f infrastructure/docker-compose.yml up --build
+#
+# Phase 0: services compose-validates and the API container exposes /healthz.
+# Worker boots and registers tasks but `process_job` is a stub until Phase 1.
+
+name: pdf-excel-converter
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: converter
+      POSTGRES_PASSWORD: converter
+      POSTGRES_DB: converter
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U converter -d converter"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    env_file: ../backend/.env.example
+    environment:
+      DATABASE_URL: postgresql+psycopg://converter:converter@postgres:5432/converter
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis:    { condition: service_healthy }
+    volumes:
+      - storage-data:/var/lib/converter/storage
+    ports:
+      - "8000:8000"
+
+  worker:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile.worker
+    env_file: ../backend/.env.example
+    environment:
+      DATABASE_URL: postgresql+psycopg://converter:converter@postgres:5432/converter
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis:    { condition: service_healthy }
+    volumes:
+      - storage-data:/var/lib/converter/storage
+      - paddle-models:/root/.paddleocr        # Phase 3: cache OCR model weights
+
+  # Single Celery beat instance — runs the periodic cleanup task.
+  # Multiple beats would multiply the schedule, so this stays at scale 1.
+  beat:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile.worker
+    env_file: ../backend/.env.example
+    environment:
+      DATABASE_URL: postgresql+psycopg://converter:converter@postgres:5432/converter
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis:    { condition: service_healthy }
+    volumes:
+      - storage-data:/var/lib/converter/storage
+    command: ["celery", "-A", "app.queue.celery_app", "beat", "--loglevel=INFO"]
+
+  frontend:
+    image: node:20-alpine
+    working_dir: /app
+    command: sh -c "npm install --no-audit --no-fund && npm run dev -- -p 3000 -H 0.0.0.0"
+    environment:
+      # Hit nginx (port 8080) so /api routes through to the backend container.
+      # For direct-to-backend development without nginx, override with
+      # `http://localhost:8000/api`.
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:8080/api
+    volumes:
+      - ../frontend:/app
+      - frontend-node-modules:/app/node_modules
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+  nginx:
+    image: nginx:1.27-alpine
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "8080:80"
+    depends_on:
+      - frontend
+      - backend
+
+volumes:
+  postgres-data:
+  storage-data:
+  paddle-models:
+  frontend-node-modules:

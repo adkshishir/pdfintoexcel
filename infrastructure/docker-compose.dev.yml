@@ -1,0 +1,80 @@
+# Development overlay — mounts source code and enables hot reload.
+#
+# Usage (from repo root):
+#   docker compose \
+#     -f infrastructure/docker-compose.yml \
+#     -f infrastructure/docker-compose.dev.yml \
+#     up --build
+#
+# What this changes vs the base compose:
+#   backend  — source mounted at /app/app; uvicorn runs with --reload
+#   worker   — source mounted; watchmedo restarts the worker on any .py change
+#   beat     — source mounted (restart manually after schedule changes)
+#   frontend — no change needed: base already uses `npm run dev` + source mount
+#   nginx    — no change; direct ports 8000 (API) and 3000 (Next.js) are also
+#              available without nginx if preferred
+#
+# First run will build images and download OCR model weights (~1.5 GB into the
+# paddle-models volume). Subsequent starts reuse the volume.
+#
+# To rebuild only backend/worker deps after a requirements.txt change:
+#   docker compose -f infrastructure/docker-compose.yml \
+#                  -f infrastructure/docker-compose.dev.yml \
+#     build backend worker beat
+
+services:
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    volumes:
+      - ../backend/app:/app/app          # live source override
+      - ../backend/alembic:/app/alembic  # migration scripts
+      - storage-data:/var/lib/converter/storage
+    command:
+      - uvicorn
+      - app.main:app
+      - --host
+      - "0.0.0.0"
+      - --port
+      - "8000"
+      - --reload                         # restart on any .py change under /app
+      - --reload-dir
+      - /app/app
+
+  worker:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile.worker
+    volumes:
+      - ../backend/app:/app/app
+      - storage-data:/var/lib/converter/storage
+      - paddle-models:/root/.paddleocr
+    # watchmedo detects .py changes and restarts the celery process.
+    command:
+      - watchmedo
+      - auto-restart
+      - --directory=/app/app
+      - --pattern=*.py
+      - --recursive
+      - --
+      - celery
+      - -A
+      - app.queue.celery_app
+      - worker
+      - --loglevel=INFO
+      - --concurrency=1                  # single worker is enough for local dev
+
+  beat:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile.worker
+    volumes:
+      - ../backend/app:/app/app
+      - storage-data:/var/lib/converter/storage
+    command:
+      - celery
+      - -A
+      - app.queue.celery_app
+      - beat
+      - --loglevel=INFO
