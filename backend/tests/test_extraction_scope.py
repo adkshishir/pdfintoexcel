@@ -53,6 +53,22 @@ def test_api_accepts_extraction_scope_full_document(client) -> None:
     assert r.status_code == 202, r.text
     job = r.json()
     assert job["extraction_scope"] == "full_document"
+    assert job["full_document_pages"] == "single_sheet"
+
+
+def test_api_accepts_full_document_per_page(client) -> None:
+    pdf = b"%PDF-1.4\n" + b"x" * 200
+    r = client.post(
+        "/api/jobs",
+        files={"file": ("x.pdf", io.BytesIO(pdf), "application/pdf")},
+        data={
+            "mode": "fast",
+            "extraction_scope": "full_document",
+            "full_document_pages": "per_page",
+        },
+    )
+    assert r.status_code == 202, r.text
+    assert r.json()["full_document_pages"] == "per_page"
 
 
 def test_api_default_extraction_scope_tables_only(client) -> None:
@@ -64,6 +80,17 @@ def test_api_default_extraction_scope_tables_only(client) -> None:
     )
     assert r.status_code == 202
     assert r.json()["extraction_scope"] == "tables_only"
+    assert r.json()["full_document_pages"] == "single_sheet"
+
+
+def test_api_rejects_invalid_full_document_pages(client) -> None:
+    pdf = b"%PDF-1.4\n" + b"x" * 200
+    r = client.post(
+        "/api/jobs",
+        files={"file": ("x.pdf", io.BytesIO(pdf), "application/pdf")},
+        data={"mode": "fast", "full_document_pages": "grid"},
+    )
+    assert r.status_code == 400
 
 
 def test_api_rejects_invalid_extraction_scope(client) -> None:

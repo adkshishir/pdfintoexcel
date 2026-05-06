@@ -19,9 +19,10 @@ visual sections:
   │  Footer lines (italic, gray)         │
   └──────────────────────────────────────┘
 
-Public entry point
-------------------
+Public entry points
+-------------------
   export_structured_document(content, output_path) -> int  (total rows written)
+  export_structured_document_per_page(content, output_path) -> int  (sum across sheets)
 """
 
 from __future__ import annotations
@@ -74,25 +75,68 @@ def export_structured_document(
     wb = Workbook()
     ws = wb.active
     ws.title = _safe_sheet_name("Document")
+    _populate_structured_worksheet(ws, content)
+    n_cols = max(6, _doc_col_count(content))
+    _set_col_widths(ws, n_cols, content)
+    wb.save(output_path)
+    return max(1, ws.max_row or 1)
 
+
+def export_structured_document_per_page(
+    content: DocumentContent,
+    output_path: Path,
+) -> int:
+    """Same structured layout as `export_structured_document`, one sheet per PDF page.
+
+    Repeated `header_lines` appear on every sheet. `footer_lines` are written
+    only on the last sheet so legal disclaimers are not duplicated on each page.
+    Returns the sum of max row indices across sheets (for metrics).
+    """
+    wb = Workbook()
+    wb.remove(wb.active)
+    total_rows = 0
+    pc = content.page_count
+
+    for p in range(pc):
+        blocks = [b for b in content.body_blocks if b.page == p]
+        sub = DocumentContent(
+            header_lines=list(content.header_lines),
+            footer_lines=list(content.footer_lines) if p == pc - 1 else [],
+            body_blocks=blocks,
+            page_count=1,
+        )
+        title = _safe_sheet_name(f"Page_{p + 1}")
+        ws = wb.create_sheet(title)
+        if not (sub.header_lines or sub.body_blocks or sub.footer_lines):
+            ws.cell(row=1, column=1, value="(no content on this page)")
+            ws.row_dimensions[1].height = 16
+            total_rows += 1
+        else:
+            _populate_structured_worksheet(ws, sub)
+            total_rows += max(1, ws.max_row or 1)
+        n_cols = max(6, _doc_col_count(sub))
+        _set_col_widths(ws, n_cols, sub)
+
+    wb.save(output_path)
+    return total_rows
+
+
+def _populate_structured_worksheet(ws, content: DocumentContent) -> None:
+    """Write header, body blocks, and footer to *ws* (mutates workbook)."""
     n_cols = _doc_col_count(content)
-
     current_row = 1
 
-    # ── HEADER SECTION ──────────────────────────────────────────────────
     if content.header_lines:
         current_row = _write_section_label(ws, current_row, "DOCUMENT HEADER", n_cols)
         for i, line in enumerate(content.header_lines):
             current_row = _write_header_line(ws, current_row, line, n_cols, is_first=(i == 0))
-        current_row += 1   # spacer after header
+        current_row += 1
 
-    # ── BODY BLOCKS ─────────────────────────────────────────────────────
     for block in content.body_blocks:
         current_row = _write_block(ws, block, current_row, n_cols)
 
-    current_row += 1   # spacer before footer
+    current_row += 1
 
-    # ── FOOTER SECTION ──────────────────────────────────────────────────
     if content.footer_lines:
         current_row = _write_section_label(ws, current_row, "DOCUMENT FOOTER", n_cols)
         for line in content.footer_lines:
@@ -100,11 +144,6 @@ def export_structured_document(
                           font=_ITALIC_GRAY, alignment=_WRAP_ALIGN)
             ws.row_dimensions[current_row].height = 14
             current_row += 1
-
-    total_rows = max(1, ws.max_row or 1)
-    _set_col_widths(ws, n_cols, content)
-    wb.save(output_path)
-    return total_rows
 
 
 # ---------------------------------------------------------------------------

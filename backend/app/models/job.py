@@ -33,7 +33,14 @@ class OutputLayout(StrEnum):
 
 class ExtractionScope(StrEnum):
     TABLES_ONLY = "tables_only"       # reconstruct → clean → typed Excel (default)
-    FULL_DOCUMENT = "full_document"   # layout grid from all WordBoxes, one sheet per page
+    FULL_DOCUMENT = "full_document"   # structured reading-order workbook from words + tables
+
+
+class FullDocumentPages(StrEnum):
+    """Used when extraction_scope is full_document."""
+
+    SINGLE_SHEET = "single_sheet"   # default — one "Document" sheet
+    PER_PAGE = "per_page"          # one worksheet per PDF page
 
 
 def _utcnow() -> datetime:
@@ -50,6 +57,9 @@ class Job(Base):
     output_layout: Mapped[str] = mapped_column(String(16), nullable=False, default=OutputLayout.MERGED)
     extraction_scope: Mapped[str] = mapped_column(
         String(20), nullable=False, default=ExtractionScope.TABLES_ONLY,
+    )
+    full_document_pages: Mapped[str] = mapped_column(
+        String(20), nullable=False, default=FullDocumentPages.SINGLE_SHEET,
     )
 
     input_url: Mapped[str] = mapped_column(Text, nullable=False)
@@ -83,6 +93,7 @@ class Job(Base):
             "mode":         self.mode,
             "output_layout": self.output_layout,
             "extraction_scope": self.extraction_scope,
+            "full_document_pages": self.full_document_pages,
             "filename":     self.filename,
             "size_bytes":   self.size_bytes,
             "page_count":   self.page_count,

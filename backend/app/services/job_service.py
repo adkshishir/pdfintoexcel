@@ -14,7 +14,14 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
-from app.models.job import ExtractionScope, Job, JobMode, JobStatus, OutputLayout
+from app.models.job import (
+    ExtractionScope,
+    FullDocumentPages,
+    Job,
+    JobMode,
+    JobStatus,
+    OutputLayout,
+)
 from app.storage import get_storage
 
 
@@ -39,6 +46,7 @@ def create_job(
     mode: JobMode = JobMode.FAST,
     output_layout: OutputLayout = OutputLayout.MERGED,
     extraction_scope: ExtractionScope = ExtractionScope.TABLES_ONLY,
+    full_document_pages: FullDocumentPages = FullDocumentPages.SINGLE_SHEET,
 ) -> Job:
     """Persist file to storage, create a row in `queued` state, return it.
 
@@ -58,6 +66,7 @@ def create_job(
         mode=mode,
         output_layout=output_layout,
         extraction_scope=extraction_scope,
+        full_document_pages=full_document_pages,
         input_url=key,
         filename=filename,
         size_bytes=size_bytes,

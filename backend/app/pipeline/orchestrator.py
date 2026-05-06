@@ -20,7 +20,9 @@ Where RawTable[] comes from:
 
 `extraction_scope`:
     - `tables_only`   — structured table path (default).
-    - `full_document` — layout workbook (position-mapped text + embedded images).
+    - `full_document` — reading-order workbook (words + tables).
+      Use `full_document_pages`: `single_sheet` (default) or `per_page` (one
+      worksheet per PDF page; footer only on the last sheet).
 
 Footer-word filtering (tables_only only)
 -----------------------------------------
@@ -42,7 +44,14 @@ from app.pipeline.digital_words import extract_digital_words
 from app.pipeline.exporter import export_excel
 from app.pipeline.ocr_pipeline import extract_ocr
 from app.pipeline.pdfplumber_tables import extract_pdfplumber_tables
-from app.pipeline.types import ExtractionScope, Mode, OutputLayout, PipelineResult, WordBox
+from app.pipeline.types import (
+    ExtractionScope,
+    FullDocumentPages,
+    Mode,
+    OutputLayout,
+    PipelineResult,
+    WordBox,
+)
 from app.table.reconstructor import reconstruct_tables
 
 log = logging.getLogger(__name__)
@@ -55,6 +64,7 @@ def run_pipeline(
     mode: Mode = "fast",
     output_layout: OutputLayout = "merged",
     extraction_scope: ExtractionScope = "tables_only",
+    full_document_pages: FullDocumentPages = "single_sheet",
 ) -> PipelineResult:
     timings: dict[str, int] = {}
 
@@ -97,7 +107,11 @@ def run_pipeline(
 
         t_classify = time.time()
         content = classify_document(boxes, raw, clean, page_count, pdf_path=pdf_path)
-        layout_row_count = export_structured_document(content, output_path)
+        if full_document_pages == "per_page":
+            from app.pipeline.structured_exporter import export_structured_document_per_page
+            layout_row_count = export_structured_document_per_page(content, output_path)
+        else:
+            layout_row_count = export_structured_document(content, output_path)
         timings["export_ms"] = _ms_since(t_classify)
         log.info("full_document structured export: %d rows", layout_row_count)
     else:

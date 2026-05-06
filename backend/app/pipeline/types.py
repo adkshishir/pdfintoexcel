@@ -23,6 +23,8 @@ Mode = Literal["fast", "accurate"]
 OutputLayout = Literal["merged", "split"]
 # tables_only — structured table path; full_document — layout workbook from all boxes
 ExtractionScope = Literal["tables_only", "full_document"]
+# full_document only: one worksheet vs one worksheet per PDF page
+FullDocumentPages = Literal["single_sheet", "per_page"]
 
 
 @dataclass(frozen=True)

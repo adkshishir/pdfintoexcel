@@ -12,7 +12,7 @@ from app.pipeline.content_classifier import (
     classify_document,
 )
 from app.pipeline.structured_exporter import export_structured_document
-from app.pipeline.types import CleanTable, ContentBlock, RawCell, RawTable, WordBox
+from app.pipeline.types import CleanTable, ContentBlock, DocumentContent, RawCell, RawTable, WordBox
 
 
 def _minimal_raw_table(
@@ -232,3 +232,21 @@ def test_body_drops_standalone_column_header_paragraph() -> None:
     out = _strip_redundant_grid_header_body_blocks(blocks, [ct])
     assert len(out) == 1
     assert out[0].lines == ["Real preamble"]
+
+
+def test_export_per_page_writes_one_sheet_per_pdf_page(tmp_path: Path) -> None:
+    from app.pipeline.structured_exporter import export_structured_document_per_page
+
+    doc = DocumentContent(
+        header_lines=[],
+        footer_lines=[],
+        body_blocks=[
+            ContentBlock(kind="paragraph", page=0, y_start=10, lines=["Alpha"], table=None),
+            ContentBlock(kind="paragraph", page=1, y_start=10, lines=["Beta"], table=None),
+        ],
+        page_count=2,
+    )
+    out = tmp_path / "multi.xlsx"
+    export_structured_document_per_page(doc, out)
+    wb = load_workbook(out)
+    assert wb.sheetnames == ["Page_1", "Page_2"]

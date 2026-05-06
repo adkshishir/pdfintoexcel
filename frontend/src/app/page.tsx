@@ -7,6 +7,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? '/api';
 type Mode = 'fast' | 'accurate';
 type OutputLayout = 'merged' | 'split';
 type ExtractionScope = 'tables_only' | 'full_document';
+type FullDocumentPages = 'single_sheet' | 'per_page';
 type Status = 'pending' | 'queued' | 'processing' | 'completed' | 'failed';
 
 interface Job {
@@ -15,6 +16,7 @@ interface Job {
   mode: Mode;
   output_layout: OutputLayout;
   extraction_scope: ExtractionScope;
+  full_document_pages: FullDocumentPages;
   filename: string;
   size_bytes: number;
   page_count: number | null;
@@ -38,6 +40,8 @@ export default function Page() {
   const [mode, setMode] = useState<Mode>('fast');
   const [outputLayout, setOutputLayout] = useState<OutputLayout>('merged');
   const [extractionScope, setExtractionScope] = useState<ExtractionScope>('tables_only');
+  const [fullDocumentPages, setFullDocumentPages] =
+    useState<FullDocumentPages>('single_sheet');
   const [job, setJob] = useState<Job | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -69,6 +73,7 @@ export default function Page() {
       fd.append('mode', mode);
       fd.append('output_layout', outputLayout);
       fd.append('extraction_scope', extractionScope);
+      fd.append('full_document_pages', fullDocumentPages);
       const res = await fetch(`${API_BASE}/jobs`, { method: 'POST', body: fd });
       if (!res.ok) {
         const txt = await res.text();
@@ -107,6 +112,13 @@ export default function Page() {
             onChange={setExtractionScope}
             disabled={uploading || inFlight}
           />
+          {extractionScope === 'full_document' && (
+            <FullDocumentPagesSelect
+              value={fullDocumentPages}
+              onChange={setFullDocumentPages}
+              disabled={uploading || inFlight}
+            />
+          )}
           <ModeSelect
             mode={mode}
             onChange={setMode}
@@ -200,6 +212,60 @@ function ScopeSelect({
               name='extraction_scope'
               value={o.value}
               checked={scope === o.value}
+              onChange={() => onChange(o.value)}
+              className='sr-only'
+            />
+            <span>{o.label}</span>
+            <span className='ml-2 text-xs text-zinc-500 dark:text-zinc-500'>
+              {o.hint}
+            </span>
+          </label>
+        ))}
+      </div>
+    </fieldset>
+  );
+}
+
+function FullDocumentPagesSelect({
+  value,
+  onChange,
+  disabled,
+}: {
+  value: FullDocumentPages;
+  onChange: (v: FullDocumentPages) => void;
+  disabled: boolean;
+}) {
+  const opts: { value: FullDocumentPages; label: string; hint: string }[] = [
+    {
+      value: 'single_sheet',
+      label: 'One worksheet',
+      hint: 'entire PDF on one sheet',
+    },
+    {
+      value: 'per_page',
+      label: 'Sheet per PDF page',
+      hint: 'Page_1, Page_2, …',
+    },
+  ];
+  return (
+    <fieldset className='flex flex-col gap-2' disabled={disabled}>
+      <legend className='text-sm font-medium text-zinc-700 dark:text-zinc-300'>
+        Full document layout
+      </legend>
+      <div className='flex gap-2'>
+        {opts.map((o) => (
+          <label
+            key={o.value}
+            className={`flex-1 cursor-pointer rounded-md border px-3 py-2 text-center text-sm transition-colors ${
+              value === o.value
+                ? 'border-zinc-950 bg-zinc-100 dark:border-zinc-50 dark:bg-zinc-800 text-zinc-950 dark:text-zinc-50'
+                : 'border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-900'
+            }`}>
+            <input
+              type='radio'
+              name='full_document_pages'
+              value={o.value}
+              checked={value === o.value}
               onChange={() => onChange(o.value)}
               className='sr-only'
             />
@@ -332,6 +398,16 @@ function JobPanel({
           k='Scope'
           v={isFullDoc ? 'Full document' : 'Tables only'}
         />
+        {isFullDoc && (
+          <Row
+            k='Doc layout'
+            v={
+              job.full_document_pages === 'per_page'
+                ? 'sheet per PDF page'
+                : 'single worksheet'
+            }
+          />
+        )}
         {!isFullDoc && (
           <Row
             k='Layout'

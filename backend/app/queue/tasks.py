@@ -50,6 +50,7 @@ def process_job(self, job_id: str) -> dict:  # noqa: ANN001
         mode = job.mode
         output_layout = job.output_layout
         extraction_scope = job.extraction_scope
+        full_document_pages = job.full_document_pages
 
     try:
         from app.pipeline.orchestrator import run_pipeline
@@ -69,6 +70,7 @@ def process_job(self, job_id: str) -> dict:  # noqa: ANN001
                 mode=mode,
                 output_layout=output_layout,
                 extraction_scope=extraction_scope,
+                full_document_pages=full_document_pages,
             )
             with tmp_path.open("rb") as fh:
                 storage.put(out_key, fh, content_type=
@@ -88,6 +90,7 @@ def process_job(self, job_id: str) -> dict:  # noqa: ANN001
                     "mean_confidence": result.mean_confidence,
                     "elapsed_ms": int((time.time() - started) * 1000),
                     "extraction_scope": extraction_scope,
+                    "full_document_pages": full_document_pages,
                     **({"layout_row_count": result.layout_row_count} if result.layout_row_count is not None else {}),
                 },
             )

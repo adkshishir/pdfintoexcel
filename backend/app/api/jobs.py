@@ -16,7 +16,13 @@ from sqlalchemy.orm import Session
 from app.api.limiter import limit_create_job, limit_download, limit_get_job
 from app.config import get_settings
 from app.models.database import get_db
-from app.models.job import ExtractionScope, JobMode, JobStatus, OutputLayout
+from app.models.job import (
+    ExtractionScope,
+    FullDocumentPages,
+    JobMode,
+    JobStatus,
+    OutputLayout,
+)
 from app.queue.tasks import process_job
 from app.services import job_service
 from app.storage import get_storage
@@ -31,6 +37,7 @@ async def create_job(
     mode: str = Form(default="fast"),
     output_layout: str = Form(default="merged"),
     extraction_scope: str = Form(default="tables_only"),
+    full_document_pages: str = Form(default="single_sheet"),
     db: Session = Depends(get_db),
 ) -> dict[str, Any]:
     settings = get_settings()
@@ -41,6 +48,8 @@ async def create_job(
         raise HTTPException(400, f"invalid output_layout: {output_layout}")
     if extraction_scope not in (ExtractionScope.TABLES_ONLY, ExtractionScope.FULL_DOCUMENT):
         raise HTTPException(400, f"invalid extraction_scope: {extraction_scope}")
+    if full_document_pages not in (FullDocumentPages.SINGLE_SHEET, FullDocumentPages.PER_PAGE):
+        raise HTTPException(400, f"invalid full_document_pages: {full_document_pages}")
 
     head = await file.read(1024)
     if not looks_like_pdf(head):
@@ -70,6 +79,7 @@ async def create_job(
         mode=JobMode(mode),
         output_layout=OutputLayout(output_layout),
         extraction_scope=ExtractionScope(extraction_scope),
+        full_document_pages=FullDocumentPages(full_document_pages),
     )
 
     # Importing the task here keeps API ↔ worker boundary clean *because*

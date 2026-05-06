@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-container-highest": "#353534",
+                      "on-secondary-container": "#e6ecff",
+                      "tertiary-container": "#009ae1",
+                      "on-background": "#e5e2e1",
+                      "tertiary-fixed": "#cbe6ff",
+                      "secondary-fixed": "#d8e2ff",
+                      "tertiary": "#8ecdff",
+                      "primary-container": "#ff5a1f",
+                      "surface-variant": "#353534",
+                      "on-surface": "#e5e2e1",
+                      "error": "#ffb4ab",
+                      "on-secondary-fixed": "#001a42",
+                      "on-secondary": "#002e6a",
+                      "surface-bright": "#3a3939",
+                      "primary": "#ffb59e",
+                      "surface-dim": "#131313",
+                      "surface-container": "#201f1f",
+                      "on-tertiary-container": "#002e47",
+                      "secondary-container": "#0566d9",
+                      "tertiary-fixed-dim": "#8ecdff",
+                      "outline-variant": "#5b4038",
+                      "primary-fixed-dim": "#ffb59e",
+                      "on-primary-container": "#541400",
+                      "on-tertiary-fixed": "#001e30",
+                      "surface-container-low": "#1c1b1b",
+                      "on-surface-variant": "#e4beb3",
+                      "inverse-surface": "#e5e2e1",
+                      "on-error-container": "#ffdad6",
+                      "outline": "#ab897f",
+                      "inverse-on-surface": "#313030",
+                      "error-container": "#93000a",
+                      "on-primary": "#5e1700",
+                      "primary-fixed": "#ffdbd0",
+                      "inverse-primary": "#ae3200",
+                      "surface-container-lowest": "#0e0e0e",
+                      "on-tertiary-fixed-variant": "#004b71",
+                      "secondary-fixed-dim": "#adc6ff",
+                      "surface-container-high": "#2a2a2a",
+                      "on-error": "#690005",
+                      "background": "#131313",
+                      "surface": "#131313",
+                      "on-tertiary": "#00344f",
+                      "secondary": "#adc6ff",
+                      "surface-tint": "#ffb59e",
+                      "on-secondary-fixed-variant": "#004395",
+                      "on-primary-fixed": "#3a0b00",
+                      "on-primary-fixed-variant": "#852400"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "unit": "8px",
+                      "gutter": "16px",
+                      "xl": "48px",
+                      "sm": "8px",
+                      "md": "16px",
+                      "xs": "4px",
+                      "lg": "24px",
+                      "container-max": "800px"
+              },
+              "fontFamily": {
+                      "headline-xl": ["Inter"],
+                      "button-text": ["Inter"],
+                      "label-caps": ["Inter"],
+                      "body-sm": ["Inter"],
+                      "body-md": ["Inter"],
+                      "headline-lg": ["Inter"]
+              },
+              "fontSize": {
+                      "headline-xl": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "button-text": ["16px", {"lineHeight": "1", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                      "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                      "body-sm": ["14px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                      "body-md": ["16px", {"lineHeight": "1.6", "letterSpacing": "0", "fontWeight": "400"}],
+                      "headline-lg": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .upload-zone {
+            border: 2px dashed #5b4038;
+            background-image: repeating-linear-gradient(0deg, #5b4038, #5b4038 4px, transparent 4px, transparent 8px);
+        }
+        .active-selection {
+            border-color: #ffb59e !important;
+            background-color: rgba(255, 181, 158, 0.05);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="bg-surface-container border-b border-outline-variant w-full sticky top-0 z-50">
+<div class="flex justify-between items-center h-xl px-lg w-full max-w-container-max mx-auto">
+<div class="font-headline-lg text-headline-lg font-bold text-primary">Exceflow PDF</div>
+<nav class="hidden md:flex items-center gap-md">
+<a class="text-primary font-bold border-b-2 border-primary pb-1 font-body-md text-body-md transition-colors duration-200" href="#">Convert</a>
+<a class="text-on-surface-variant hover:text-on-surface font-body-md text-body-md transition-colors duration-200" href="#">Merge</a>
+<a class="text-on-surface-variant hover:text-on-surface font-body-md text-body-md transition-colors duration-200" href="#">Compress</a>
+<a class="text-on-surface-variant hover:text-on-surface font-body-md text-body-md transition-colors duration-200" href="#">Split</a>
+<a class="text-on-surface-variant hover:text-on-surface font-body-md text-body-md transition-colors duration-200" href="#">About</a>
+</nav>
+<div class="flex items-center gap-sm">
+<button class="text-on-surface-variant hover:text-primary transition-colors duration-200 font-button-text text-button-text px-md py-sm">Log In</button>
+<button class="bg-primary text-on-primary font-bold px-lg py-sm rounded-full active:scale-95 transition-transform font-button-text text-button-text">Sign Up</button>
+</div>
+</div>
+</header>
+<main class="flex-grow w-full max-w-container-max mx-auto px-md py-xl">
+<!-- Hero Section -->
+<section class="mb-xl text-center md:text-left">
+<h1 class="font-headline-xl text-headline-xl text-on-surface mb-sm">PDF to Excel Converter</h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">Drop a PDF (digital, scanned, or mixed). Tables come back as a structured workbook.</p>
+</section>
+<!-- Tool Interface -->
+<div class="grid grid-cols-1 gap-xl">
+<!-- Upload Area -->
+<div class="upload-zone rounded-xl p-xl flex flex-col items-center justify-center text-center transition-all duration-300 hover:bg-surface-container-low group cursor-pointer">
+<div class="mb-md">
+<span class="material-symbols-outlined text-[48px] text-primary" data-icon="upload_file">upload_file</span>
+</div>
+<p class="font-headline-lg text-headline-lg text-on-surface mb-md">Drag and drop your PDF here</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-lg">Supports .pdf up to 50MB</p>
+<button class="bg-surface-container-highest text-on-surface font-button-text text-button-text px-xl py-md rounded-full border border-outline hover:border-primary transition-all">Choose File</button>
+</div>
+<!-- Configuration Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-lg">
+<!-- Extraction Scope -->
+<div class="space-y-sm">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Extraction scope</span>
+<div class="grid grid-cols-2 gap-sm">
+<div class="bg-surface-container border border-outline-variant p-lg rounded-xl cursor-pointer active-selection transition-all flex flex-col gap-xs">
+<span class="font-button-text text-button-text text-on-surface">Tables only</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Ignores non-tabular content</span>
+</div>
+<div class="bg-surface-container border border-outline-variant p-lg rounded-xl cursor-pointer hover:border-outline transition-all flex flex-col gap-xs">
+<span class="font-button-text text-button-text text-on-surface">Full document</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Converts all text and layouts</span>
+</div>
+</div>
+</div>
+<!-- Mode -->
+<div class="space-y-sm">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Mode</span>
+<div class="grid grid-cols-2 gap-sm">
+<div class="bg-surface-container border border-outline-variant p-lg rounded-xl cursor-pointer hover:border-outline transition-all flex flex-col gap-xs">
+<span class="font-button-text text-button-text text-on-surface">Fast (200 DPI)</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">High speed, digital docs</span>
+</div>
+<div class="bg-surface-container border border-outline-variant p-lg rounded-xl cursor-pointer active-selection transition-all flex flex-col gap-xs">
+<span class="font-button-text text-button-text text-on-surface">Accurate</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">300 DPI, merged rows</span>
+</div>
+</div>
+</div>
+<!-- Sheet Layout -->
+<div class="space-y-sm md:col-span-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Sheet layout</span>
+<div class="grid grid-cols-2 gap-sm">
+<div class="bg-surface-container border border-outline-variant p-lg rounded-xl cursor-pointer active-selection transition-all flex items-center justify-between">
+<div>
+<span class="font-button-text text-button-text text-on-surface block">Single sheet</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Combine all tables into one tab</span>
+</div>
+<span class="material-symbols-outlined text-primary" data-icon="layers">layers</span>
+</div>
+<div class="bg-surface-container border border-outline-variant p-lg rounded-xl cursor-pointer hover:border-outline transition-all flex items-center justify-between">
+<div>
+<span class="font-button-text text-button-text text-on-surface block">Sheet per page</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Maintain original pagination</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="file_copy">file_copy</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Action Area -->
+<div class="pt-lg border-t border-outline-variant flex flex-col md:flex-row items-center justify-between gap-lg">
+<div class="flex items-center gap-md">
+<img alt="Accuracy verification visual" class="w-16 h-16 rounded-lg object-cover border border-outline-variant" data-alt="A professional, high-fidelity close-up of a digital spreadsheet interface with perfectly aligned rows and columns. The visual uses a sophisticated dark-mode aesthetic with primary orange accents highlighting specific data cells. Crisp typography and subtle grid lines convey a sense of precision and professional reliability. The lighting is soft, emphasizing the clean, minimalist structure of the high-performance data processing tool." src="https://lh3.googleusercontent.com/aida/ADBb0uhk3gzCwIug9rKmH9CJUsJkzlz8YBDQzcxOQHYegK6SjYDJijHvL9jfzaLoBv7phMg2igz5wfprmiIQLil4IjCqRrqyqa3LWSjtpzHFJv0YUk8fLORmvVzvvG3VGXOzMRFvfrdetCTJiJFSNekNTBfD-ee77WjkGZgoTQ2IycKvTB4HuVoKUQe_zEghcgeOoprhw5T-rrEWJUW1kfsFJYOAUw1TdWbJ4SiB-VqMAAuEQymSZcPKsU_6idhvuLFF5QWGcQR_2KOLjak"/>
+<div>
+<p class="font-body-md text-body-md text-on-surface font-bold">Ready to process</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Precision extraction enabled</p>
+</div>
+</div>
+<button class="w-full md:w-auto bg-primary text-on-primary font-bold px-xl py-lg rounded-full text-headline-lg active:scale-95 transition-transform shadow-xl shadow-primary/10">
+                    Convert to Excel
+                </button>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest border-t border-outline-variant mt-xl">
+<div class="flex flex-col md:flex-row justify-between items-center py-lg px-lg w-full max-w-container-max mx-auto">
+<div class="mb-md md:mb-0">
+<div class="font-headline-lg text-headline-lg font-bold text-primary mb-xs">Exceflow PDF</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">© 2024 Exceflow PDF. Precision PDF-to-Excel conversion.</p>
+</div>
+<div class="flex flex-wrap justify-center gap-md">
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors uppercase tracking-widest" href="#">Privacy Policy</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors uppercase tracking-widest" href="#">Terms of Service</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors uppercase tracking-widest" href="#">API Docs</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors uppercase tracking-widest" href="#">Contact Support</a>
+</div>
+</div>
+</footer>
+</body></html>

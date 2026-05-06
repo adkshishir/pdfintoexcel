@@ -131,6 +131,7 @@ def test_upload_full_document_scope_completes(client):
     final = client.get(f"/api/jobs/{job_id}").json()
     assert final["status"] == "completed", final
     assert final["extraction_scope"] == "full_document"
+    assert final["full_document_pages"] == "single_sheet"
     assert final["metrics"]["table_count"] >= 0
     assert final["metrics"]["extraction_scope"] == "full_document"
     assert "layout_row_count" in final["metrics"]
