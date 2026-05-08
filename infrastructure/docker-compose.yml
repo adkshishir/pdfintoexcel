@@ -89,6 +89,9 @@ services:
       # For direct-to-backend development without nginx, override with
       # `http://localhost:8000/api`.
       NEXT_PUBLIC_API_BASE_URL: http://localhost:8080/api
+      # Server components (dashboard, sitemap) call FastAPI from Node; use the
+      # Docker service name, not localhost:8080 (host-only).
+      INTERNAL_API_URL: http://backend:8000
     volumes:
       - ../frontend:/app
       - frontend-node-modules:/app/node_modules
