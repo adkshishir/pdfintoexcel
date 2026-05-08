@@ -176,3 +176,15 @@ def mark_stuck_processing_as_failed(db: Session, *, max_processing_seconds: int)
     if stuck:
         db.commit()
     return len(stuck)
+
+
+def record_download(db: Session, job_id: uuid.UUID) -> None:
+    """Increment download_count atomically (each successful download stream)."""
+    from sqlalchemy import update
+
+    db.execute(
+        update(Job)
+        .where(Job.id == job_id)
+        .values(download_count=Job.download_count + 1),
+    )
+    db.commit()

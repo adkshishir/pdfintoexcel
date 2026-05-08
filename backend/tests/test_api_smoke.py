@@ -24,3 +24,8 @@ def test_openapi_lists_jobs_routes() -> None:
     assert "/api/jobs" in paths
     assert "/api/jobs/{job_id}" in paths
     assert "/api/jobs/{job_id}/download" in paths
+    assert "/api/analytics/summary" in paths
+    assert "/api/blog/posts" in paths
+    assert "/api/blog/posts/{slug}" in paths
+    assert "/api/admin/blog/posts" in paths
+    assert "/api/admin/blog/posts/{post_id}" in paths

@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from enum import StrEnum
 from typing import Any
 
-from sqlalchemy import JSON, BigInteger, DateTime, Index, String, Text, Uuid
+from sqlalchemy import JSON, BigInteger, DateTime, Index, Integer, String, Text, Uuid
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.database import Base
@@ -74,6 +74,8 @@ class Job(Base):
     # `JSON` is portable: JSONB on Postgres, TEXT-with-JSON-encoding elsewhere.
     metrics: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
 
+    download_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
     created_at:   Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=_utcnow)
     started_at:   Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
@@ -100,6 +102,7 @@ class Job(Base):
             "pdf_type":     self.pdf_type,
             "error":        self.error,
             "metrics":      self.metrics,
+            "download_count": self.download_count,
             "created_at":   self.created_at.isoformat() if self.created_at else None,
             "started_at":   self.started_at.isoformat() if self.started_at else None,
             "completed_at": self.completed_at.isoformat() if self.completed_at else None,

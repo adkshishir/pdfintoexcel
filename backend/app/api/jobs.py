@@ -107,6 +107,8 @@ def download(job_id: uuid.UUID, db: Session = Depends(get_db)) -> StreamingRespo
     if job.status != JobStatus.COMPLETED or not job.output_url:
         raise HTTPException(409, f"job is {job.status}")
 
+    job_service.record_download(db, job_id)
+
     storage = get_storage()
     data = storage.get(job.output_url)
 

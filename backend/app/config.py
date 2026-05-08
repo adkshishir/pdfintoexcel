@@ -49,6 +49,9 @@ class Settings(BaseSettings):
     oracle_access_key: str | None = None
     oracle_secret_key: str | None = None
 
+    # --- analytics (internal dashboard) ---
+    analytics_api_key: str = ""
+
     # --- pipeline ---
     default_mode: Literal["fast", "accurate"] = "fast"
     ocr_engine: Literal["paddle", "tesseract"] = "paddle"
