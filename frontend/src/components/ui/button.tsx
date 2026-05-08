@@ -11,7 +11,7 @@ const buttonVariants = cva(
       variant: {
         default:
           'bg-primary text-primary-foreground shadow-sm shadow-black/20 hover:brightness-105 hover:shadow-md hover:shadow-black/15',
-        cta: 'rounded-xl bg-exceflow-cta text-exceflow-cta-foreground shadow-lg shadow-exceflow-cta/20 hover:brightness-105',
+        cta: 'rounded-lg bg-exceflow-cta text-exceflow-cta-foreground shadow-sm hover:brightness-105',
         secondary:
           'bg-secondary text-secondary-foreground shadow-sm shadow-black/15 hover:brightness-105',
         outline:

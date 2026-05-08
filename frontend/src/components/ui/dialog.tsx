@@ -18,7 +18,7 @@ const DialogOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/40 backdrop-blur-sm',
+      'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/40',
       className,
     )}
     {...props}
@@ -37,7 +37,7 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        'border-border bg-card data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed left-[50%] top-[50%] z-50 grid max-h-[min(90vh,720px)] w-[calc(100%-2rem)] max-w-lg translate-x-[-50%] translate-y-[-50%] gap-0 overflow-y-auto rounded-xl border p-0 shadow-lg duration-200 sm:w-full',
+        'border-0 bg-card data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid max-h-[min(90vh,720px)] w-[calc(100%-2rem)] max-w-lg translate-x-[-50%] translate-y-[-50%] gap-0 overflow-y-auto rounded-2xl p-0 shadow-lg duration-200 sm:w-full',
         className,
       )}
       {...props}>
@@ -61,7 +61,7 @@ function DialogHeader({
   return (
     <div
       className={cn(
-        'border-border flex flex-col space-y-1 border-b px-6 py-4 text-center sm:text-left',
+        'border-border flex flex-col gap-2 border-b p-6 text-center sm:text-left',
         className,
       )}
       {...props}
@@ -76,7 +76,7 @@ function DialogFooter({
   return (
     <div
       className={cn(
-        'flex flex-col-reverse gap-2 px-6 pb-6 pt-2 sm:flex-row sm:justify-end',
+        'flex flex-col-reverse gap-3 p-6 pt-0 sm:flex-row sm:justify-end',
         className,
       )}
       {...props}
