@@ -1,16 +1,15 @@
 @import "tailwindcss";
 
-/* Class-based dark mode (next-themes sets `.dark` on `<html>`) */
 @custom-variant dark (&:where(.dark, .dark *));
 
 /*
-  Theme tokens: `--exceflow-*` are swapped in `:root` vs `.dark`.
-  Tailwind maps semantic colors to these via @theme.
+  Design tokens — light-first enterprise palette.
+  PDF brand: primary #AE3200, CTA #FF5A1F. Excel/success greens used sparingly.
 */
 @theme inline {
-  --radius-sm: 0.25rem;
+  --radius-sm: 0.375rem;
   --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
+  --radius-lg: 1rem;
   --radius-xl: 1rem;
 
   --color-background: var(--exceflow-background);
@@ -43,12 +42,16 @@
 
   --color-exceflow-header: var(--exceflow-shell-header-bg);
   --color-exceflow-footer: var(--exceflow-shell-footer-bg);
-  --color-exceflow-bright-surface: var(--exceflow-bright-surface);
-  --color-exceflow-paper: var(--exceflow-paper-tint);
-  --color-exceflow-paper-faint: var(--exceflow-paper-faint);
-  --color-exceflow-hero: var(--exceflow-hero-text);
+
   --color-exceflow-cta: var(--exceflow-cta);
   --color-exceflow-cta-foreground: var(--exceflow-cta-foreground);
+
+  --color-excel: var(--exceflow-excel);
+  --color-excel-dark: var(--exceflow-excel-dark);
+  --color-excel-foreground: var(--exceflow-excel-foreground);
+
+  --color-processing: var(--exceflow-processing-bg);
+  --color-processing-foreground: var(--exceflow-processing-foreground);
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
@@ -56,15 +59,14 @@
 :root {
   color-scheme: light;
 
-  /* design.html — light SaaS */
-  --exceflow-background: #f8fafc;
-  --exceflow-foreground: #0b1c30;
+  --exceflow-background: #ffffff;
+  --exceflow-foreground: #111827;
 
   --exceflow-card: #ffffff;
-  --exceflow-card-foreground: #0b1c30;
+  --exceflow-card-foreground: #111827;
 
   --exceflow-popover: #ffffff;
-  --exceflow-popover-foreground: #0b1c30;
+  --exceflow-popover-foreground: #111827;
 
   --exceflow-primary: #ae3200;
   --exceflow-primary-foreground: #ffffff;
@@ -72,88 +74,76 @@
   --exceflow-cta: #ff5a1f;
   --exceflow-cta-foreground: #ffffff;
 
-  --exceflow-secondary: #5d5e61;
-  --exceflow-secondary-foreground: #ffffff;
+  --exceflow-secondary: #f3f4f6;
+  --exceflow-secondary-foreground: #111827;
 
-  --exceflow-muted: #eff4ff;
-  --exceflow-muted-foreground: #5b4038;
+  --exceflow-muted: #f8f9fb;
+  --exceflow-muted-foreground: #6b7280;
 
-  --exceflow-accent: #e5eeff;
-  --exceflow-accent-foreground: #0b1c30;
+  --exceflow-accent: #f8f9fb;
+  --exceflow-accent-foreground: #111827;
 
-  --exceflow-destructive: #ba1a1a;
+  --exceflow-destructive: #dc2626;
   --exceflow-destructive-foreground: #ffffff;
 
-  --exceflow-border: #e4beb3;
-  --exceflow-input: #e4beb3;
+  --exceflow-border: #e5e7eb;
+  --exceflow-input: #e5e7eb;
   --exceflow-ring: #ff5a1f;
 
-  --exceflow-shell-header-bg: rgba(248, 249, 255, 0.92);
-  --exceflow-shell-footer-bg: #ffffff;
-  --exceflow-bright-surface: #f8f9ff;
-  --exceflow-paper-tint: #e5eeff;
-  --exceflow-paper-faint: rgba(11, 28, 48, 0.03);
-  --exceflow-hero-text: #0b1c30;
+  --exceflow-shell-header-bg: #ffffff;
+  --exceflow-shell-footer-bg: #f8f9fb;
 
-  --exceflow-body-grad-1: transparent;
-  --exceflow-body-grad-2: transparent;
-  --exceflow-body-base-1: #f8fafc;
-  --exceflow-body-base-2: #f8fafc;
+  --exceflow-excel: #2e9b3e;
+  --exceflow-excel-dark: #1f7a2f;
+  --exceflow-excel-foreground: #ffffff;
 
-  --exceflow-panel-mix-end: #dce9ff;
-  --exceflow-panel-shadow: rgba(11, 28, 48, 0.08);
-  --exceflow-panel-highlight: rgba(255, 255, 255, 0.8);
+  --exceflow-processing-bg: #fff7ed;
+  --exceflow-processing-foreground: #ae3200;
 }
 
 .dark {
   color-scheme: dark;
 
-  --exceflow-background: #0e1114;
-  --exceflow-foreground: #e8eaed;
+  --exceflow-background: #0f1114;
+  --exceflow-foreground: #f3f4f6;
 
-  --exceflow-card: #151a1f;
-  --exceflow-card-foreground: #e8eaed;
+  --exceflow-card: #181b20;
+  --exceflow-card-foreground: #f3f4f6;
 
-  --exceflow-popover: #151a1f;
-  --exceflow-popover-foreground: #e8eaed;
+  --exceflow-popover: #181b20;
+  --exceflow-popover-foreground: #f3f4f6;
 
-  --exceflow-primary: #d4a27f;
-  --exceflow-primary-foreground: #1a120c;
-
-  --exceflow-secondary: #8fb8d4;
-  --exceflow-secondary-foreground: #0d1a22;
-
-  --exceflow-muted: #1e242c;
-  --exceflow-muted-foreground: #9aa3ae;
-
-  --exceflow-accent: #242b35;
-  --exceflow-accent-foreground: #e8eaed;
-
-  --exceflow-destructive: #e08580;
-  --exceflow-destructive-foreground: #1c0a09;
-
-  --exceflow-border: #2a323d;
-  --exceflow-input: #2a323d;
-  --exceflow-ring: #d4a27f;
+  --exceflow-primary: #c94a1f;
+  --exceflow-primary-foreground: #ffffff;
 
   --exceflow-cta: #ff5a1f;
   --exceflow-cta-foreground: #ffffff;
 
-  --exceflow-shell-header-bg: rgba(18, 22, 28, 0.72);
-  --exceflow-shell-footer-bg: #0a0c0f;
-  --exceflow-bright-surface: #1e252e;
-  --exceflow-paper-tint: #f4efe6;
-  --exceflow-paper-faint: rgba(244, 239, 230, 0.04);
-  --exceflow-hero-text: #f4efe6;
+  --exceflow-secondary: #27272a;
+  --exceflow-secondary-foreground: #f3f4f6;
 
-  --exceflow-body-grad-1: rgba(212, 162, 127, 0.07);
-  --exceflow-body-grad-2: rgba(143, 184, 212, 0.05);
-  --exceflow-body-base-1: #0e1114;
-  --exceflow-body-base-2: #0c0e11;
+  --exceflow-muted: #1f2328;
+  --exceflow-muted-foreground: #9ca3af;
 
-  --exceflow-panel-mix-end: #0a0c0f;
-  --exceflow-panel-shadow: rgba(0, 0, 0, 0.55);
-  --exceflow-panel-highlight: rgba(244, 239, 230, 0.06);
+  --exceflow-accent: #27272a;
+  --exceflow-accent-foreground: #f3f4f6;
+
+  --exceflow-destructive: #ef4444;
+  --exceflow-destructive-foreground: #ffffff;
+
+  --exceflow-border: #2d333b;
+  --exceflow-input: #2d333b;
+  --exceflow-ring: #ff5a1f;
+
+  --exceflow-shell-header-bg: #181b20;
+  --exceflow-shell-footer-bg: #0f1114;
+
+  --exceflow-excel: #3cab4d;
+  --exceflow-excel-dark: #2e9b3e;
+  --exceflow-excel-foreground: #ffffff;
+
+  --exceflow-processing-bg: rgba(255, 90, 31, 0.12);
+  --exceflow-processing-foreground: #ff8a5c;
 }
 
 @utility animate-exceflow-soft-pulse {
@@ -180,69 +170,5 @@
   }
   body {
     @apply min-h-screen bg-background font-sans text-foreground antialiased;
-    background-image:
-      radial-gradient(
-        ellipse 120% 80% at 50% -40%,
-        var(--exceflow-body-grad-1),
-        transparent 55%
-      ),
-      radial-gradient(
-        ellipse 90% 60% at 100% 0%,
-        var(--exceflow-body-grad-2),
-        transparent 50%
-      ),
-      linear-gradient(
-        180deg,
-        var(--exceflow-body-base-1) 0%,
-        var(--exceflow-body-base-2) 100%
-      );
-    background-attachment: fixed;
-  }
-}
-
-@layer components {
-  .exceflow-doc-panel {
-    background: linear-gradient(
-      165deg,
-      color-mix(in srgb, var(--color-card) 94%, var(--color-exceflow-paper)) 0%,
-      var(--color-card) 48%,
-      color-mix(
-          in srgb,
-          var(--color-card) 88%,
-          var(--exceflow-panel-mix-end)
-        )
-        100%
-    );
-    border: 1px solid color-mix(in srgb, var(--color-border) 85%, transparent);
-    box-shadow:
-      0 1px 0 var(--exceflow-panel-highlight),
-      0 24px 64px -32px var(--exceflow-panel-shadow);
-  }
-
-  .exceflow-upload-zone {
-    border: 1px dashed
-      color-mix(
-        in srgb,
-        var(--color-border) 75%,
-        var(--color-muted-foreground) 25%
-      );
-    background: color-mix(
-      in srgb,
-      var(--color-exceflow-paper-faint) 100%,
-      transparent
-    );
-    box-shadow: inset 0 1px 0
-      color-mix(in srgb, var(--color-exceflow-paper) 8%, transparent);
-  }
-  .exceflow-upload-zone--active {
-    border-color: color-mix(
-      in srgb,
-      var(--color-primary) 55%,
-      var(--color-border)
-    );
-    background: color-mix(in srgb, var(--color-primary) 6%, transparent);
-    box-shadow:
-      inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 12%, transparent),
-      0 0 0 3px color-mix(in srgb, var(--color-primary) 8%, transparent);
   }
 }
