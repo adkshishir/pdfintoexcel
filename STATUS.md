@@ -4,8 +4,8 @@
 > when a phase's acceptance criteria materially shift). Plan lives in
 > [`PROJECT_PLAN.md`](./PROJECT_PLAN.md).
 
-**Last updated:** 2026-05-03
-**Current phase:** **Post-completion improvements in progress.**
+**Last updated:** 2026-05-09
+**Current phase:** **Post-completion — marketing site, admin CMS, SEO, and growth tooling (actively shipping).** Core converter phases (0–10) remain complete.
 
 ---
 
@@ -24,14 +24,6 @@
 | 8   | Infrastructure & deployment           | ✅ done        | See `docs/phase-8-deployment.md`.                                                                                                                                                                                                           |
 | 9   | Security & hardening                  | ✅ done        | See `docs/phase-9-security.md`.                                                                                                                                                                                                             |
 | 10  | E2E tests + accuracy benchmark        | ✅ done        | xlsx-vs-xlsx benchmark framework (`backend/scripts/benchmark.py`), HTTP-level E2E test against `MonzoBus.pdf` with content assertions, CI workflow (`.github/workflows/ci.yml`). 44 tests pass. See `docs/phase-10-tests-and-benchmark.md`. |
-| 3   | OCR pipeline                          | ⬜ not started |                                                                                                                                                                                                                                             |
-| 4   | Table reconstruction (differentiator) | ⬜ not started | Most important phase.                                                                                                                                                                                                                       |
-| 5   | Cleaning + Excel export               | ⬜ not started |                                                                                                                                                                                                                                             |
-| 6   | Hybrid mode + fast/accurate modes     | ⬜ not started |                                                                                                                                                                                                                                             |
-| 7   | Frontend integration                  | ⬜ not started |                                                                                                                                                                                                                                             |
-| 8   | Infrastructure & deployment           | 🟡 partial     | docker-compose.yml stubbed but services not built.                                                                                                                                                                                          |
-| 9   | Security & hardening                  | ⬜ not started |                                                                                                                                                                                                                                             |
-| 10  | E2E tests + accuracy benchmark        | ⬜ not started |                                                                                                                                                                                                                                             |
 
 Legend: ⬜ not started · 🟡 partial · ✅ done · ⛔ blocked
 
@@ -124,9 +116,49 @@ Touched: `pipeline/types.py` (literal), `models/job.py` + Alembic migration `000
 
 ---
 
+## Post-completion: marketing site, SEO, landing pages & admin CMS
+
+Growth and editorial layer on top of the shipped converter — **still evolving** on `master` as of May 2026.
+
+**Backend (FastAPI)**
+
+- **Admin auth** — JWT access + refresh for the dashboard (`app/api/admin_auth.py`, `app/services/auth_service.py`, `app/models/admin_user.py`). Refresh token rotation and logout/revocation paths.
+- **Public + admin blog** — `app/api/blog.py` (published only) and `app/api/admin_blog.py` (CRUD, drafts, search). Post fields extended for SEO and scheduling (e.g. meta title, `scheduled_at`, cover image, robots directives) with ORM and migrations aligned in `0008_blog_posts_ensure_columns`.
+- **SEO data model** — `app/models/seo.py`: `SeoMeta`, structured `SchemaDocument`, internal links, optional site settings, **landing pages** (`LandingPage` with body, FAQ JSON, internal links). Admin APIs in `app/api/admin_seo.py` + `app/services/seo_service.py`.
+- **Public landing API** — `app/api/landing.py` lists and resolves **published** landing pages by slug for the marketing site.
+- **Analytics** — `app/api/analytics.py` + `app/services/analytics_service.py` expose richer overview, time series, and top-page metrics for the internal dashboard.
+
+**Database**
+
+- Alembic **`0007_admin_seo_system`** — admin users, SEO/landing/schema/linking tables, and related growth schema.
+- Alembic **`0008_blog_posts_ensure_columns`** — idempotent column repair for `blog_posts` (handles partial or drifted DBs).
+
+**Frontend (Next.js)**
+
+- **Dashboard shell** — `frontend/src/app/dashboard/layout.tsx` with nav: Analytics, Blog, SEO, Landing Pages, Site Ops, Activity. Session gating via `frontend/src/lib/admin-auth.ts` and API helpers (`admin-api.ts`).
+- **Dashboard home** — analytics overview + charts (`analytics-client.tsx`) fed from the internal analytics API.
+- **Editorial UIs** — blog CRUD under `/dashboard/blog/*`; SEO and landing-page management under `/dashboard/seo` and `/dashboard/landing-pages`.
+- **Marketing** — dynamic marketing routes (e.g. `(marketing)/[slug]`), public blog rendering and sitemap updates; header/middleware adjustments for the public site.
+
+**Tests**
+
+- `backend/tests/test_admin_auth_and_blog.py` — login, refresh rotation, logout, draft vs published visibility, slug conflicts, list/search, delete.
+- Older sections above quote **point-in-time** test counts; the backend suite has **grown** (80+ `test_*` functions across `backend/tests/`). Authoritative count: run `pytest` in CI or after `pip install -r backend/requirements.txt`.
+
+**Infra / worker**
+
+- `infrastructure/docker-compose.yml` and Celery app/tasks updated as needed for the expanded app (config surface in `app/config.py`, `app/queue/`).
+
+---
+
 ## Project complete
 
-All 10 phases shipped. End-to-end:
+All **planned** phases (0–10) shipped. Subsequent work focuses on CMS, SEO,
+landing pages, and internal analytics (see **Post-completion: marketing site,
+SEO, landing pages & admin CMS** above)—the core PDF → Excel pipeline remains
+unchanged architecturally.
+
+End-to-end (converter):
 
 - Upload `MonzoBus.pdf` (24-page bank statement) → status flips queued → processing → completed in ~12 s
 - Download a 1-sheet workbook with **550 transactions in accurate mode**, typed Date/Amount/Balance columns, plus a hidden `_confidence` sheet with conditional formatting
@@ -142,15 +174,17 @@ Known limitations are documented in the per-phase docs (search `What … deliber
 
 ## Open questions / decisions deferred
 
-- **Frontend location.** Spec said `/apps/frontend`; current is `/frontend`.
-  No move yet — confirm before Phase 7.
 - **OCR runtime.** PaddleOCR brings ~1.5GB of model weights. Bake into worker
   image (slow build, fast cold start) or download on first use (fast build,
   slow first job)? Default: bake. Revisit if image size becomes painful.
-- **Oracle Object Storage credentials.** Need OCI tenancy details before
-  Phase 8 deploy. Until then storage uses local-disk implementation.
-- **Sample PDFs for benchmarking.** Need ~20 fixtures (mix of digital,
-  scanned, handwritten, multi-table) to drive Phase 4 and Phase 10.
+- **Oracle Object Storage credentials.** Need OCI tenancy details for first
+  production deploy. Until then storage uses the local-disk implementation.
+- **Sample PDFs for benchmarking.** A broader fixture set (mix of digital,
+  scanned, handwritten, multi-table) would strengthen regression detection
+  beyond the current E2E and unit coverage.
+- **Dashboard auth UX.** Session vs cookie edge cases and which routes are
+  public vs admin-only should stay aligned with `middleware.ts` and
+  `getAdminSession` as the CMS grows.
 
 ---
 
