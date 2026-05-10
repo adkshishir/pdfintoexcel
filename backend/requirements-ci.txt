@@ -1,0 +1,51 @@
+# Same as requirements.txt but without PaddleOCR / PaddlePaddle.
+# Use in CI for speed (~300MB wheels + model weight downloads skipped).
+# Runtime worker images still install full requirements.txt (including Paddle).
+
+# --- web ---
+fastapi==0.115.6
+uvicorn[standard]==0.32.1
+python-multipart==0.0.20
+
+# --- config ---
+pydantic==2.10.4
+pydantic-settings==2.7.0
+email-validator==2.2.0
+PyJWT==2.10.1
+
+# --- db ---
+sqlalchemy==2.0.36
+psycopg[binary]==3.2.3
+alembic==1.14.0
+
+# --- queue ---
+celery[redis]==5.4.0
+redis==5.2.1
+
+# --- pdf / tables (phases 2–6) ---
+pymupdf==1.25.1
+pdfplumber==0.11.4
+camelot-py[cv]==0.11.0
+
+# --- ocr (without paddle stack) ---
+pytesseract==0.3.13
+pillow==11.0.0
+
+# --- excel (phase 5) ---
+pandas==2.2.3
+openpyxl==3.1.5
+numpy==1.26.4
+
+# --- storage (phase 8) ---
+boto3==1.35.85
+
+# --- security (phase 9) ---
+python-magic==0.4.27
+
+# --- date parsing ---
+python-dateutil>=2.9.0
+
+# --- dev / tests ---
+pytest==8.3.4
+pytest-asyncio==0.25.0
+httpx==0.28.1

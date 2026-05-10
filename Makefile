@@ -2,7 +2,7 @@
 COMPOSE      := docker compose -f infrastructure/docker-compose.yml
 COMPOSE_PROD := $(COMPOSE) -f infrastructure/docker-compose.prod.yml
 
-.PHONY: help up down restart logs ps build shell-backend shell-worker shell-db migrate test test-backend lint frontend-build prod-up prod-down prod-logs
+.PHONY: help up down restart logs ps build shell-backend shell-worker shell-db migrate test test-backend lint frontend-build prod-up prod-down prod-logs prod-migrate
 
 help:  ## list targets
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-18s %s\n", $$1, $$2}'
@@ -50,3 +50,5 @@ prod-down:    ## stop the prod stack (keeps volumes)
 	$(COMPOSE_PROD) down
 prod-logs:    ## tail prod logs
 	$(COMPOSE_PROD) logs -f --tail=200
+prod-migrate: ## alembic upgrade on prod stack (after deploy or new migrations)
+	$(COMPOSE_PROD) exec backend alembic upgrade head

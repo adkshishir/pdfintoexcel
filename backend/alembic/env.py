@@ -13,6 +13,8 @@ from app.config import get_settings
 from app.models.database import Base
 import app.models.blog_post  # noqa: F401 — register model with Base.metadata
 import app.models.job  # noqa: F401 — register model with Base.metadata
+import app.models.admin_user  # noqa: F401 — register model with Base.metadata
+import app.models.seo  # noqa: F401 — register model with Base.metadata
 
 config = context.config
 if config.config_file_name is not None:
@@ -46,7 +48,11 @@ def run_migrations_online() -> None:
     # so two processes never race on CREATE TABLE (PostgreSQL composite type name).
     _LOCK_KEY_1 = 715_914_251
     _LOCK_KEY_2 = 1
-    with connectable.connect() as connection:
+    # SQLAlchemy 2.0: a plain connect() autobegins a txn on first execute (the
+    # advisory lock). Alembic's begin_transaction() then nests; only the inner
+    # part may commit, leaving the outer txn open so closing the connection rolls
+    # back all DDL. Use engine.begin() so the whole migration + lock commits.
+    with connectable.begin() as connection:
         dialect = connection.dialect.name
         if dialect == "postgresql":
             connection.execute(text(f"SELECT pg_advisory_lock({_LOCK_KEY_1}, {_LOCK_KEY_2})"))
