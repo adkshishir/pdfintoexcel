@@ -1,47 +1,59 @@
 import Link from 'next/link';
 
+import { AnalyticsClient } from '@/app/dashboard/analytics-client';
+import { adminFetch } from '@/lib/admin-auth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { getAnalyticsKey, getInternalApiBase } from '@/lib/internal-api';
+import { getInternalApiBase } from '@/lib/internal-api';
 
 export const dynamic = 'force-dynamic';
 
-type Summary = {
+type Overview = {
   total_jobs: number;
   by_status: Record<string, number>;
   downloads_total: number;
   completed_last_24h: number;
   completed_last_7d: number;
+  successful_conversions: number;
+  failed_conversions: number;
+  ocr_usage: number;
+  full_document_usage: number;
+  daily_active_users: number;
+  conversion_rate: number;
 };
 
-async function fetchSummary(): Promise<Summary | null> {
+async function fetchOverview(): Promise<Overview | null> {
   const base = getInternalApiBase();
-  const key = getAnalyticsKey();
-  if (!key) {
-    return null;
-  }
-  const url = `${base}/analytics/summary`;
+  const url = `${base}/analytics/overview`;
   try {
-    const res = await fetch(url, {
-      headers: { 'X-Analytics-Key': key },
-      cache: 'no-store',
-    });
+    const res = await adminFetch(url);
     if (!res.ok) {
       return null;
     }
-    return (await res.json()) as Summary;
+    return (await res.json()) as Overview;
   } catch {
     return null;
   }
 }
 
+async function fetchSeries(range: string): Promise<Array<{ date: string; uploads: number }>> {
+  const res = await adminFetch(`${getInternalApiBase()}/analytics/timeseries?range=${range}`);
+  if (!res.ok) return [];
+  const data = (await res.json()) as { series: Array<{ date: string; uploads: number }> };
+  return data.series;
+}
+
+async function fetchTopPages(): Promise<Array<{ path: string; visits: number; conversion_rate: number }>> {
+  const res = await adminFetch(`${getInternalApiBase()}/analytics/top-pages`);
+  if (!res.ok) return [];
+  return (await res.json()) as Array<{ path: string; visits: number; conversion_rate: number }>;
+}
+
 export default async function DashboardPage() {
-  const summary = await fetchSummary();
-  const completed = summary?.by_status?.completed ?? 0;
-  const failed = summary?.by_status?.failed ?? 0;
-  const finished = completed + failed;
-  const successRate =
-    finished > 0 ? Math.round((completed / finished) * 1000) / 10 : null;
+  const range = '30d';
+  const summary = await fetchOverview();
+  const series = await fetchSeries(range);
+  const topPages = await fetchTopPages();
 
   return (
     <div className='bg-background min-h-screen px-4 py-10 sm:px-6'>
@@ -64,6 +76,13 @@ export default async function DashboardPage() {
             <Link href='/'>Back to site</Link>
           </Button>
         </div>
+        <div className='mb-6 flex flex-wrap items-center gap-2'>
+          {['7d', '30d', '90d'].map((r) => (
+            <Button key={r} variant={r === range ? 'default' : 'outline'} size='sm' className='rounded-lg'>
+              {r}
+            </Button>
+          ))}
+        </div>
 
         {!summary ? (
           <Card className='border-destructive/30'>
@@ -74,13 +93,9 @@ export default async function DashboardPage() {
               <p className='text-muted-foreground text-sm'>
                 Check{' '}
                 <code className='text-foreground bg-muted rounded px-1 py-0.5 text-xs'>
-                  INTERNAL_API_URL
+                  admin auth tokens
                 </code>{' '}
-                and{' '}
-                <code className='text-foreground bg-muted rounded px-1 py-0.5 text-xs'>
-                  ANALYTICS_API_KEY
-                </code>{' '}
-                on the Next.js server. They must match the FastAPI service.
+                are missing or expired.
               </p>
             </CardContent>
           </Card>
@@ -88,31 +103,22 @@ export default async function DashboardPage() {
           <>
             <div className='mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
               <StatCard label='Total jobs' value={summary.total_jobs} />
-              <StatCard label='Completed' value={completed} accent='text-excel' />
-              <StatCard label='Failed' value={failed} accent='text-destructive' />
+              <StatCard label='Successful' value={summary.successful_conversions} accent='text-excel' />
+              <StatCard label='Failed' value={summary.failed_conversions} accent='text-destructive' />
               <StatCard
                 label='Downloads (all time)'
                 value={summary.downloads_total}
               />
             </div>
-            <div className='mb-6 grid gap-4 sm:grid-cols-2'>
-              <StatCard
-                label='Completed (last 24h)'
-                value={summary.completed_last_24h}
-              />
-              <StatCard
-                label='Completed (last 7d)'
-                value={summary.completed_last_7d}
-              />
+            <div className='mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
+              <StatCard label='OCR usage' value={summary.ocr_usage} />
+              <StatCard label='Full-document mode' value={summary.full_document_usage} />
+              <StatCard label='Daily active users' value={summary.daily_active_users} />
+              <StatCard label='Conversion rate %' value={Math.round(summary.conversion_rate)} />
             </div>
-            {successRate != null && (
-              <p className='text-muted-foreground mb-8 text-sm'>
-                Success rate (completed / completed+failed):{' '}
-                <span className='text-foreground font-semibold'>
-                  {successRate}%
-                </span>
-              </p>
-            )}
+            <div className='mb-8'>
+              <AnalyticsClient series={series} topPages={topPages} />
+            </div>
             <Card className='shadow-sm'>
               <CardHeader>
                 <CardTitle className='text-base'>By status</CardTitle>
