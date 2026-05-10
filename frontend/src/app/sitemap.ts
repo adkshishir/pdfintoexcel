@@ -3,6 +3,9 @@ import type { MetadataRoute } from 'next';
 import { fetchPublishedPosts } from '@/lib/blog';
 import { getInternalApiBase } from '@/lib/internal-api';
 
+/** Avoid calling the API during `next build` (no backend in the image build container). */
+export const dynamic = 'force-dynamic';
+
 const site = 'https://pdfintoexcel.com';
 
 const staticPages: MetadataRoute.Sitemap = [

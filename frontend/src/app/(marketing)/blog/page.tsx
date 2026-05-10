@@ -3,6 +3,9 @@ import type { Metadata } from 'next';
 
 import { fetchPublishedPosts } from '@/lib/blog';
 
+/** Fetches from FastAPI; do not prerender at `next build` when no API is up (Docker/local). */
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Blog — pdfintoexcel',
   description:
