@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 
 import { fetchPublishedPostBySlug } from '@/lib/blog';
+import { buildMetadata } from '@/lib/seo';
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -15,33 +16,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!post) {
     return { title: 'Post not found' };
   }
-  const ogTitle = post.og_title ?? post.title;
-  const ogDesc = post.og_description ?? post.meta_description;
-  const kw = post.keywords
-    ?.split(',')
-    .map((s) => s.trim())
-    .filter(Boolean);
-  return {
-    title: `${post.title} — pdfintoexcel`,
+  return buildMetadata({
+    title: post.title,
+    metaTitle: post.meta_title,
     description: post.meta_description,
-    keywords: kw && kw.length > 0 ? kw : undefined,
-    alternates: post.canonical_path
-      ? { canonical: post.canonical_path }
-      : undefined,
-    openGraph: {
-      title: ogTitle,
-      description: ogDesc,
-      type: 'article',
-      publishedTime: post.published_at ?? undefined,
-      images: post.og_image_url ? [post.og_image_url] : undefined,
-    },
-    twitter: {
-      card: post.og_image_url ? 'summary_large_image' : 'summary',
-      title: ogTitle,
-      description: ogDesc,
-      images: post.og_image_url ? [post.og_image_url] : undefined,
-    },
-  };
+    keywords: post.keywords,
+    canonicalUrl: post.canonical_url,
+    ogTitle: post.og_title,
+    ogDescription: post.og_description,
+    ogImageUrl: post.og_image_url,
+  });
 }
 
 export default async function BlogPostPage({ params }: Props) {
@@ -51,7 +35,7 @@ export default async function BlogPostPage({ params }: Props) {
     notFound();
   }
 
-  const jsonLd = {
+  const jsonLd = post.schema_jsonld ?? {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
     headline: post.title,
