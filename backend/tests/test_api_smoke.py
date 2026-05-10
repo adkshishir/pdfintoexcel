@@ -29,3 +29,15 @@ def test_openapi_lists_jobs_routes() -> None:
     assert "/api/blog/posts/{slug}" in paths
     assert "/api/admin/blog/posts" in paths
     assert "/api/admin/blog/posts/{post_id}" in paths
+    assert "/api/admin/auth/login" in paths
+    assert "/api/admin/auth/refresh" in paths
+    assert "/api/admin/auth/logout" in paths
+    assert "/api/admin/auth/me" in paths
+    assert "/api/admin/auth/users" in paths
+
+    schemes = spec.get("components", {}).get("securitySchemes", {})
+    assert any(
+        (s.get("type") == "http" and s.get("scheme") == "bearer")
+        or s.get("type") == "http" and str(s.get("scheme", "")).lower() == "bearer"
+        for s in schemes.values()
+    )
