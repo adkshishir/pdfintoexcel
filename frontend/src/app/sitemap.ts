@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 
 import { fetchPublishedPosts } from '@/lib/blog';
+import { getInternalApiBase } from '@/lib/internal-api';
 
 const site = 'https://pdfintoexcel.com';
 
@@ -40,11 +41,19 @@ const staticPages: MetadataRoute.Sitemap = [
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const posts = await fetchPublishedPosts();
+  const landingRes = await fetch(`${getInternalApiBase()}/landing-pages`, { next: { revalidate: 300 } });
+  const landing = landingRes.ok ? ((await landingRes.json()) as Array<{ slug: string; updated_at: string }>) : [];
   const blogPosts: MetadataRoute.Sitemap = posts.map((p) => ({
     url: `${site}/blog/${p.slug}`,
     lastModified: p.updated_at ? new Date(p.updated_at) : new Date(),
     changeFrequency: 'monthly',
     priority: 0.65,
   }));
-  return [...staticPages, ...blogPosts];
+  const landingPages: MetadataRoute.Sitemap = landing.map((p) => ({
+    url: `${site}/${p.slug}`,
+    lastModified: p.updated_at ? new Date(p.updated_at) : new Date(),
+    changeFrequency: 'weekly',
+    priority: 0.85,
+  }));
+  return [...staticPages, ...blogPosts, ...landingPages];
 }
