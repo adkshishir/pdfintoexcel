@@ -11,7 +11,7 @@
 | Real Oracle Object Storage     | `backend/app/storage/oracle.py`               | boto3 against S3-compatible OCI endpoint, lazy client.             |
 | Oracle storage tests           | `backend/tests/test_oracle_storage.py`        | 4 tests, in-memory fake S3 (no moto/network).                      |
 | Frontend production Dockerfile | `frontend/Dockerfile` + `.dockerignore`       | Multi-stage: deps → build → runner. Inlines `NEXT_PUBLIC_API_BASE_URL` at build. |
-| Production compose overlay     | `infrastructure/docker-compose.prod.yml`      | No source mounts, restart policies, no per-service ports (only nginx). |
+| Production compose overlay     | `infrastructure/docker-compose.prod.yml`      | No source mounts, restart policies, loopback **4017**/ **4018** for host nginx (optional `compose.host-ports.env`). |
 | Production env template        | `infrastructure/.env.prod.example`            | Documents Oracle creds + locked-down CORS + secrets to fill in.    |
 | Hardened nginx                 | `infrastructure/nginx/nginx.conf`             | gzip + security headers + smart timeouts + keepalive upstreams.    |
 | Make targets                   | `Makefile`                                    | `up/down/logs/migrate/shell-*/test/prod-*`.                        |
@@ -66,7 +66,7 @@ Key differences from dev:
 | --------------- | -------------------------------------- | --------------------------------------- |
 | Frontend image  | `node:20-alpine` + `npm install` on boot | Built from `frontend/Dockerfile`     |
 | Source mounts   | `frontend/` bind-mounted (HMR)         | None — code baked into image            |
-| Port exposure   | backend:8000, frontend:3000, nginx:8080 | Only nginx:80 (other ports `!reset`)  |
+| Port exposure   | backend:8000, frontend:3000, nginx:8080 (via `docker-compose.dev-host-ports.yml`) | **127.0.0.1:4017** (API) + **127.0.0.1:4018** (Next); host nginx on :80 |
 | Restart policy  | implicit (none)                        | `restart: unless-stopped`               |
 | Env source      | `backend/.env.example`                 | `infrastructure/.env.prod` (gitignored) |
 | Storage backend | `local` → docker volume                | `oracle` → OCI Object Storage           |

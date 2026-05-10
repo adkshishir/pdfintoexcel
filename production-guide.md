@@ -58,20 +58,20 @@ On the server, after `git clone`:
 
 ---
 
-## 4. Point nginx at your domain (once)
+## 4. Point host nginx at the stack (once)
 
-Edit `infrastructure/nginx/nginx.conf`: **`server_name`** should match your real hostname(s) (the example lists `pdfintoexcel.com`). A mismatch mainly matters if you host multiple sites on one nginx.
+Production Compose does **not** run the in-repo nginx container (avoids binding host port 80). Instead, **`make prod-up`** publishes **Next.js on `127.0.0.1:4018`** and **FastAPI on `127.0.0.1:4017`** (defaults chosen to avoid clashing with other apps on **8000**). Copy `infrastructure/compose.host-ports.env.example` to **`infrastructure/compose.host-ports.env`** if you want different host ports — `make prod-up` loads that file automatically.
+
+1. Copy the `server { ... }` block from **`infrastructure/nginx/host.example.conf`** into your **host** nginx config (adjust **`server_name`**).
+2. Reload host nginx: `sudo nginx -t && sudo systemctl reload nginx`.
+
+**Local dev** still uses Compose’s nginx on **`:8080`** when you run `make up` (that target enables the `compose-nginx` profile).
 
 ---
 
 ## 5. TLS (HTTPS)
 
-The Compose setup listens on **80** by default; **443** is commented in nginx. For a public launch you normally:
-
-- **Option A:** Uncomment the **443** block in nginx and mount **Let’s Encrypt** certs, or  
-- **Option B:** Put **Cloudflare** or a **load balancer** in front and terminate TLS there.
-
-Until TLS is in place, users hit **HTTP only**—fine for a private smoke test; **not** ideal once real accounts and passwords matter.
+Terminate TLS on **host** nginx (or use Cloudflare / a load balancer in front). The example `host.example.conf` only listens on **80**; add **`listen 443 ssl`** and certificate paths for production.
 
 ---
 
@@ -83,7 +83,7 @@ From the **repo root**:
 make prod-up
 ```
 
-That builds API/worker plus the production **frontend** image and starts **postgres**, **redis**, **backend**, **worker**, **beat**, **frontend**, and **nginx**.
+That builds API/worker plus the production **frontend** image and starts **postgres**, **redis**, **backend**, **worker**, **beat**, and **frontend** (loopback **4018** / **4017** for host nginx). It does **not** start Compose nginx.
 
 ---
 

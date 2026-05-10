@@ -43,8 +43,10 @@ docs/             One write-up per completed phase (see STATUS.md index).
 The stack runs via Docker Compose. Once Phase 1 lands:
 
 ```bash
-# from repo root
-docker compose -f infrastructure/docker-compose.yml up --build
+# from repo root (recommended)
+make up
+# or: docker compose -f infrastructure/docker-compose.yml \
+#   -f infrastructure/docker-compose.dev-host-ports.yml --profile compose-nginx up --build
 ```
 
 Backend-only iteration (after `pip install -r backend/requirements.txt`):

@@ -9,7 +9,10 @@
 #   - frontend uses its own production Dockerfile (no live source mount,
 #     no `npm install` on every boot)
 #   - all services restart unless explicitly stopped
-#   - no port mapping for backend/frontend — only nginx is reachable from outside
+#   - no compose-nginx profile — bind frontend/backend to loopback for host nginx
+#     (see nginx/host.example.conf). Host ports default to 4017 (API) and 4018
+#     (Next) so 127.0.0.1:8000 stays free for other apps. Override with
+#     HOST_PORT_BACKEND / HOST_PORT_FRONTEND (e.g. infrastructure/compose.host-ports.env).
 #   - reads secrets from `infrastructure/.env.prod` (not committed)
 #
 # Provide `infrastructure/.env.prod` based on `backend/.env.example`. At
@@ -34,7 +37,8 @@ services:
     restart: unless-stopped
     env_file:
       - .env.prod
-    ports: !reset []     # no external port — nginx fronts it
+    ports:
+      - "127.0.0.1:${HOST_PORT_BACKEND:-4017}:8000"
 
   worker:
     restart: unless-stopped
@@ -56,7 +60,8 @@ services:
     command: !reset null   # use the image's CMD (next start), not the dev override
     volumes: !reset []     # no source mount in prod
     restart: unless-stopped
-    ports: !reset []
+    ports:
+      - "127.0.0.1:${HOST_PORT_FRONTEND:-4018}:3000"
     environment:
       NEXT_PUBLIC_API_BASE_URL: /api
       # Server Components / Route Handlers call FastAPI from the Node container.
@@ -64,13 +69,3 @@ services:
       # Must match backend ANALYTICS_API_KEY; set in shell or `infrastructure/.env`.
       ANALYTICS_API_KEY: ${ANALYTICS_API_KEY:-}
 
-  nginx:
-    restart: unless-stopped
-    ports:
-      - "80:80"
-    # TLS termination: replace with port 443 + mounted certs from your provider.
-    # Example (uncomment when adding):
-    # ports:
-    #   - "443:443"
-    # volumes:
-    #   - /etc/letsencrypt/live/<domain>:/etc/nginx/certs:ro

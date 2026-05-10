@@ -1,6 +1,14 @@
 .DEFAULT_GOAL := help
-COMPOSE      := docker compose -f infrastructure/docker-compose.yml
-COMPOSE_PROD := $(COMPOSE) -f infrastructure/docker-compose.prod.yml
+COMPOSE_BASE := docker compose -f infrastructure/docker-compose.yml
+# Dev: publish backend:8000 + frontend:3000 on the host; optional compose-nginx :8080.
+COMPOSE      := $(COMPOSE_BASE) \
+	-f infrastructure/docker-compose.dev-host-ports.yml \
+	--profile compose-nginx
+# Optional `infrastructure/compose.host-ports.env` sets HOST_PORT_BACKEND / HOST_PORT_FRONTEND.
+COMPOSE_PROD_ENV := $(wildcard infrastructure/compose.host-ports.env)
+COMPOSE_PROD := $(COMPOSE_BASE) \
+	$(if $(COMPOSE_PROD_ENV),--env-file $(COMPOSE_PROD_ENV),) \
+	-f infrastructure/docker-compose.prod.yml
 
 .PHONY: help up down restart logs ps build shell-backend shell-worker shell-db migrate test test-backend lint frontend-build prod-up prod-down prod-logs prod-migrate
 

@@ -1,0 +1,10 @@
+# Published ports for local dev only (`make up`). Keep out of prod so `base + prod`
+# can choose different host bindings (e.g. 4017/4018) without merge conflicts.
+
+services:
+  backend:
+    ports:
+      - "8000:8000"
+  frontend:
+    ports:
+      - "3000:3000"

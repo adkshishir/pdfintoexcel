@@ -4,6 +4,7 @@
 .env.*.local
 infrastructure/.env.prod
 infrastructure/.env
+infrastructure/compose.host-ports.env
 
 # python
 __pycache__/
