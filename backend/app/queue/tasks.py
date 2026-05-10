@@ -25,6 +25,7 @@ from app.config import get_settings
 from app.models.database import session_scope
 from app.queue.celery_app import celery_app
 from app.services import job_service
+from app.services import blog_service
 from app.storage import get_storage
 
 log = logging.getLogger(__name__)
@@ -136,3 +137,10 @@ def cleanup_expired_jobs() -> dict:
     if any(out.values()):
         log.info("cleanup_expired_jobs: %s", out)
     return out
+
+
+@celery_app.task(name="converter.publish_scheduled_blog_posts")
+def publish_scheduled_blog_posts() -> dict:
+    with session_scope() as db:
+        published = blog_service.publish_scheduled_posts(db)
+    return {"published": published}

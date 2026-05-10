@@ -31,6 +31,10 @@ def create_celery() -> Celery:
                 "task": "converter.cleanup_expired_jobs",
                 "schedule": 5 * 60,
             },
+            "publish-scheduled-blog-posts": {
+                "task": "converter.publish_scheduled_blog_posts",
+                "schedule": 60,
+            },
         },
         timezone="UTC",
     )
