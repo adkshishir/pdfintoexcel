@@ -21,8 +21,9 @@ venv/
 # install at the root.
 node_modules/
 
-# storage / runtime
-storage/
+# Repo-root runtime uploads only (don't use `storage/` — that ignores
+# `backend/app/storage/`, which must be versioned for Docker builds.)
+/storage/
 *.sqlite
 *.log
 
