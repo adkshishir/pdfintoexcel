@@ -23,7 +23,7 @@ export default async function EditBlogPostPage({ params }: Props) {
           <div>
             <h1 className='text-foreground text-2xl font-bold tracking-tight'>Edit post</h1>
             <p className='text-muted-foreground mt-1 text-sm'>
-              {post.published ? (
+              {post.status === 'published' ? (
                 <Link
                   href={`/blog/${post.slug}`}
                   className='text-primary font-medium underline-offset-4 hover:underline'>
