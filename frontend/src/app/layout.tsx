@@ -22,13 +22,17 @@ export const metadata: Metadata = {
   description:
     'Convert digital, scanned, and handwritten PDFs into structured Excel files.',
   keywords: [
+    'pdfintoexcel',
     'PDF to Excel',
     'convert PDF',
+    'Convert PDF to Excel for free',
     'table extraction',
     'OCR PDF',
     'spreadsheet',
-    'pdfintoexcel',
   ],
+  robots: {
+    index: false,
+  },
   openGraph: {
     type: 'website',
     locale: 'en_US',
