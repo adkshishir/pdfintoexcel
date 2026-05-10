@@ -75,15 +75,9 @@ export default async function DashboardBlogListPage() {
                       <p className='text-muted-foreground mt-1 truncate text-sm'>/{p.slug}</p>
                     </div>
                     <div className='flex shrink-0 flex-col items-end gap-1'>
-                      {p.published ? (
-                        <Badge variant='success' className='rounded-lg'>
-                          Live
-                        </Badge>
-                      ) : (
-                        <Badge variant='secondary' className='rounded-lg'>
-                          Draft
-                        </Badge>
-                      )}
+                      <Badge variant={p.status === 'published' ? 'success' : 'secondary'} className='rounded-lg'>
+                        {p.status === 'published' ? 'Live' : p.status}
+                      </Badge>
                       <span className='text-muted-foreground text-xs'>
                         Updated {p.updated_at?.slice(0, 10) ?? '—'}
                       </span>
