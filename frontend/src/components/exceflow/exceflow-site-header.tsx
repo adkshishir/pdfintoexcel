@@ -3,7 +3,6 @@ import Link from 'next/link';
 
 import { ExceflowThemeToggle } from '@/components/exceflow/exceflow-theme-toggle';
 import { SiteHeaderNav } from '@/components/exceflow/site-header-nav';
-import { Button } from '@/components/ui/button';
 
 export function ExceflowSiteHeader() {
   return (
@@ -25,20 +24,6 @@ export function ExceflowSiteHeader() {
         <SiteHeaderNav />
         <div className='flex items-center gap-2'>
           <ExceflowThemeToggle />
-          <Button
-            type='button'
-            variant='ghost'
-            size='sm'
-            className='text-muted-foreground hover:text-foreground hidden sm:inline-flex'>
-            Log in
-          </Button>
-          <Button
-            type='button'
-            variant='cta'
-            size='sm'
-            className='rounded-xl font-semibold sm:h-9 sm:px-5 sm:text-sm'>
-            Sign up
-          </Button>
         </div>
       </div>
     </header>

@@ -12,12 +12,15 @@ export type BlogListItem = {
 };
 
 export type BlogPostPublic = BlogListItem & {
+  meta_title: string | null;
   body: string;
   og_title: string | null;
   og_description: string | null;
   og_image_url: string | null;
-  canonical_path: string | null;
+  canonical_url: string | null;
+  robots_directives: string | null;
   keywords: string | null;
+  schema_jsonld: Record<string, unknown> | null;
 };
 
 export async function fetchPublishedPosts(): Promise<BlogListItem[]> {
