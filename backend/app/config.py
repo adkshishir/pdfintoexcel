@@ -52,6 +52,14 @@ class Settings(BaseSettings):
     # --- analytics (internal dashboard) ---
     analytics_api_key: str = ""
 
+    # --- admin auth ---
+    jwt_secret: str = "change-me"
+    jwt_algorithm: str = "HS256"
+    jwt_access_ttl_minutes: int = 30
+    jwt_refresh_ttl_days: int = 14
+    admin_bootstrap_email: str = "admin@pdfintoexcel.com"
+    admin_bootstrap_password: str = "admin123"
+
     # --- pipeline ---
     default_mode: Literal["fast", "accurate"] = "fast"
     ocr_engine: Literal["paddle", "tesseract"] = "paddle"
