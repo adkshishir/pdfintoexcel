@@ -1,21 +1,14 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
-const COOKIE = 'pf_dashboard_session';
+const ACCESS_COOKIE = 'pf_admin_access_token';
+const REFRESH_COOKIE = 'pf_admin_refresh_token';
 
 export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  if (pathname.startsWith('/dashboard/login')) {
-    return NextResponse.next();
-  }
-
-  const token = request.cookies.get(COOKIE)?.value;
-  const expected = process.env.DASHBOARD_SESSION_SECRET;
-  if (!expected || token !== expected) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/dashboard/login';
-    url.searchParams.set('from', pathname);
-    return NextResponse.redirect(url);
+  const token = request.cookies.get(ACCESS_COOKIE)?.value;
+  const refresh = request.cookies.get(REFRESH_COOKIE)?.value;
+  if (!token && !refresh) {
+    return NextResponse.redirect(new URL('/', request.url));
   }
 
   return NextResponse.next();
