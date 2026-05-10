@@ -41,6 +41,11 @@ services:
     env_file:
       - .env.prod
 
+  beat:
+    restart: unless-stopped
+    env_file:
+      - .env.prod
+
   frontend:
     image: ${FRONTEND_IMAGE:-pdf-excel-converter-frontend:latest}
     build:
@@ -54,6 +59,10 @@ services:
     ports: !reset []
     environment:
       NEXT_PUBLIC_API_BASE_URL: /api
+      # Server Components / Route Handlers call FastAPI from the Node container.
+      INTERNAL_API_URL: http://backend:8000
+      # Must match backend ANALYTICS_API_KEY; set in shell or `infrastructure/.env`.
+      ANALYTICS_API_KEY: ${ANALYTICS_API_KEY:-}
 
   nginx:
     restart: unless-stopped
