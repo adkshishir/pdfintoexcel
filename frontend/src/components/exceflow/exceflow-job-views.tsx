@@ -1,5 +1,7 @@
 'use client';
 
+import type { RefObject } from 'react';
+
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -50,9 +52,11 @@ function ExceflowDlRow({ k, v }: { k: string; v: string }) {
 function JobPanelBody({
   job,
   downloadHref,
+  downloadRef,
 }: {
   job: ConverterJob;
   downloadHref: string | null;
+  downloadRef?: RefObject<HTMLAnchorElement | null>;
 }) {
   const m = (job.metrics ?? {}) as Record<string, number | string>;
   const isFullDoc = job.extraction_scope === 'full_document';
@@ -83,6 +87,20 @@ function JobPanelBody({
           k='Scope'
           v={isFullDoc ? 'Full document' : 'Tables only'}
         />
+        <ExceflowDlRow
+          k='Document'
+          v={job.document_type === 'scanned' ? 'Scanned (OCR)' : 'Normal PDF'}
+        />
+        {job.image_export !== 'none' && (
+          <ExceflowDlRow
+            k='Images'
+            v={
+              job.image_export === 'only'
+                ? 'Images only'
+                : 'Separate Figures sheet'
+            }
+          />
+        )}
         {isFullDoc && (
           <ExceflowDlRow
             k='Doc layout'
@@ -126,7 +144,7 @@ function JobPanelBody({
         <Button
           asChild
           className='w-full rounded-xl bg-excel text-excel-foreground hover:opacity-95 sm:w-auto'>
-          <a href={downloadHref} download>
+          <a ref={downloadRef} href={downloadHref} download>
             Download .xlsx
           </a>
         </Button>
@@ -140,11 +158,13 @@ export function ExceflowJobPanel({
   downloadHref,
   className,
   embedded = false,
+  downloadRef,
 }: {
   job: ConverterJob;
   downloadHref: string | null;
   className?: string;
   embedded?: boolean;
+  downloadRef?: RefObject<HTMLAnchorElement | null>;
 }) {
   if (embedded) {
     return (
@@ -153,7 +173,11 @@ export function ExceflowJobPanel({
           <p className='text-muted-foreground text-sm font-medium'>Status</p>
           <JobStatusBadge status={job.status} />
         </div>
-        <JobPanelBody job={job} downloadHref={downloadHref} />
+        <JobPanelBody
+          job={job}
+          downloadHref={downloadHref}
+          downloadRef={downloadRef}
+        />
       </div>
     );
   }
@@ -167,7 +191,11 @@ export function ExceflowJobPanel({
         <JobStatusBadge status={job.status} />
       </CardHeader>
       <CardContent className='flex flex-col gap-6 pt-0'>
-        <JobPanelBody job={job} downloadHref={downloadHref} />
+        <JobPanelBody
+          job={job}
+          downloadHref={downloadHref}
+          downloadRef={downloadRef}
+        />
       </CardContent>
     </Card>
   );

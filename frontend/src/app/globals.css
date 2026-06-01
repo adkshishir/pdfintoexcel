@@ -4,7 +4,7 @@
 
 /*
   Design tokens — light-first enterprise palette.
-  PDF brand: primary #AE3200, CTA #FF5A1F. Excel/success greens used sparingly.
+  Primary = PDF (#E14B3C). Excel greens via --exceflow-excel / bg-excel for convert CTAs.
 */
 @theme inline {
   --radius-sm: 0.375rem;
@@ -53,6 +53,9 @@
   --color-processing: var(--exceflow-processing-bg);
   --color-processing-foreground: var(--exceflow-processing-foreground);
 
+  --color-pdf: var(--exceflow-primary);
+  --color-pdf-foreground: var(--exceflow-primary-foreground);
+
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
@@ -68,14 +71,14 @@
   --exceflow-popover: #ffffff;
   --exceflow-popover-foreground: #111827;
 
-  --exceflow-primary: #ae3200;
+  --exceflow-primary: #E14B3C;
   --exceflow-primary-foreground: #ffffff;
 
-  --exceflow-cta: #ff5a1f;
+  --exceflow-cta: #107C41;
   --exceflow-cta-foreground: #ffffff;
 
-  --exceflow-secondary: #f3f4f6;
-  --exceflow-secondary-foreground: #111827;
+  --exceflow-secondary: #EAF4ED;
+  --exceflow-secondary-foreground: #0B5D31;
 
   --exceflow-muted: #f8f9fb;
   --exceflow-muted-foreground: #6b7280;
@@ -83,22 +86,36 @@
   --exceflow-accent: #f8f9fb;
   --exceflow-accent-foreground: #111827;
 
-  --exceflow-destructive: #dc2626;
+  --exceflow-destructive: #E14B3C;
   --exceflow-destructive-foreground: #ffffff;
 
-  --exceflow-border: #e5e7eb;
+  --exceflow-border: #DCE7E0;
   --exceflow-input: #e5e7eb;
-  --exceflow-ring: #ff5a1f;
+  --exceflow-ring: #E14B3C;
 
   --exceflow-shell-header-bg: #ffffff;
-  --exceflow-shell-footer-bg: #f8f9fb;
+  --exceflow-shell-footer-bg: #F4F8F5;
 
-  --exceflow-excel: #2e9b3e;
-  --exceflow-excel-dark: #1f7a2f;
+  --exceflow-excel: #107C41;
+  --exceflow-excel-dark: #0B5D31;
   --exceflow-excel-foreground: #ffffff;
 
-  --exceflow-processing-bg: #fff7ed;
-  --exceflow-processing-foreground: #ae3200;
+  --exceflow-processing-bg: #EAF4ED;
+  --exceflow-processing-foreground: #107C41;
+
+  /* New design colors */
+  --ink: #0A1F14;
+  --text: #2B3A31;
+  --muted: #5C6F64;
+  --brand: #107C41;
+  --brand-dark: #0B5D31;
+  --brand-bright: #18A558;
+  --lime: #3FBF6B;
+  --surface: #FFFFFF;
+  --bg: #F4F8F5;
+  --bg-tint: #EAF4ED;
+  --border-strong: #C5D4CB;
+  --pdf-red: #E14B3C;
 }
 
 .dark {
@@ -116,11 +133,11 @@
   --exceflow-primary: #c94a1f;
   --exceflow-primary-foreground: #ffffff;
 
-  --exceflow-cta: #ff5a1f;
+  --exceflow-cta: #3cab4d;
   --exceflow-cta-foreground: #ffffff;
 
-  --exceflow-secondary: #27272a;
-  --exceflow-secondary-foreground: #f3f4f6;
+  --exceflow-secondary: #1f2a24;
+  --exceflow-secondary-foreground: #a8d4b8;
 
   --exceflow-muted: #1f2328;
   --exceflow-muted-foreground: #9ca3af;
@@ -133,7 +150,7 @@
 
   --exceflow-border: #2d333b;
   --exceflow-input: #2d333b;
-  --exceflow-ring: #ff5a1f;
+  --exceflow-ring: #e86a52;
 
   --exceflow-shell-header-bg: #181b20;
   --exceflow-shell-footer-bg: #0f1114;
@@ -144,6 +161,19 @@
 
   --exceflow-processing-bg: rgba(255, 90, 31, 0.12);
   --exceflow-processing-foreground: #ff8a5c;
+
+  --ink: #e8f0eb;
+  --text: #c5d4cb;
+  --muted: #9ca3af;
+  --brand: #3cab4d;
+  --brand-dark: #2e9b3e;
+  --brand-bright: #4cd964;
+  --lime: #3FBF6B;
+  --surface: #181b20;
+  --bg: #0f1114;
+  --bg-tint: #1f2a24;
+  --border-strong: #2d333b;
+  --pdf-red: #e86a52;
 }
 
 @utility animate-exceflow-soft-pulse {

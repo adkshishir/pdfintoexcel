@@ -1,11 +1,10 @@
 'use client';
 
 import { useEffect } from 'react';
-import Link from 'next/link';
 
-import { ExceflowSiteFooter } from '@/components/exceflow/exceflow-site-footer';
-import { ExceflowSiteHeader } from '@/components/exceflow/exceflow-site-header';
-import { Button } from '@/components/ui/button';
+import { ExceflowSiteShell } from '@/components/exceflow/exceflow-site-shell';
+import { ExceflowThemeProvider } from '@/components/exceflow/exceflow-theme-provider';
+import { StatusPage } from '@/components/exceflow/status-page';
 
 export default function GlobalError({
   error,
@@ -18,35 +17,25 @@ export default function GlobalError({
     console.error(error);
   }, [error]);
 
+  const ref = error.digest ? ` (ref: ${error.digest})` : '';
+
   return (
     <html lang='en' suppressHydrationWarning>
-      <body className='flex min-h-screen flex-col bg-background text-foreground antialiased'>
-        <div className='flex min-h-screen flex-col'>
-          <ExceflowSiteHeader />
-          <main className='flex flex-1 flex-col items-center justify-center px-4 pt-24 pb-20 text-center'>
-            <p className='text-destructive text-sm font-medium'>Something went wrong</p>
-            <h1 className='text-foreground mt-2 text-2xl font-bold tracking-tight'>
-              We could not complete that action
-            </h1>
-            <p className='text-muted-foreground mt-3 max-w-md text-sm leading-relaxed'>
-              Please try again. If the problem continues, contact support with the
-              time of the error
-              {error.digest ? ` (ref: ${error.digest})` : ''}.
-            </p>
-            <div className='mt-8 flex flex-wrap justify-center gap-3'>
-              <Button type='button' onClick={() => reset()} className='rounded-xl'>
-                Try again
-              </Button>
-              <Button asChild variant='outline' className='rounded-xl'>
-                <Link href='/'>Home</Link>
-              </Button>
-              <Button asChild variant='ghost' className='rounded-xl'>
-                <Link href='/contact'>Contact</Link>
-              </Button>
-            </div>
-          </main>
-          <ExceflowSiteFooter />
-        </div>
+      <body className='bg-background text-foreground flex min-h-screen flex-col antialiased'>
+        <ExceflowThemeProvider>
+          <ExceflowSiteShell mainClassName='flex flex-col'>
+            <StatusPage
+              code='Error'
+              title='We could not complete that action'
+              description={`Please try again. If the problem continues, contact support with the time of the error${ref}.`}
+              primaryHref='/'
+              primaryLabel='Home'
+              secondary={[{ href: '/contact', label: 'Contact' }]}
+              onRetry={() => reset()}
+              tone='error'
+            />
+          </ExceflowSiteShell>
+        </ExceflowThemeProvider>
       </body>
     </html>
   );

@@ -1,16 +1,21 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 
+import { MarketingPageBody } from '@/components/exceflow/marketing-page-body';
+import { MarketingPageHeader } from '@/components/exceflow/marketing-page-header';
+import { BlogIndexJsonLd } from '@/components/seo/blog-index-json-ld';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { fetchPublishedPosts } from '@/lib/blog';
+import { staticPageMetadata } from '@/lib/seo';
 
-/** Fetches from FastAPI; do not prerender at `next build` when no API is up (Docker/local). */
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = staticPageMetadata({
+  path: '/blog',
   title: 'Blog — pdfintoexcel',
   description:
     'Articles on PDF to Excel conversion, table reconstruction, OCR, and secure document handling.',
-};
+});
 
 function formatDate(iso: string | null | undefined) {
   if (!iso) return '';
@@ -27,54 +32,65 @@ export default async function BlogIndexPage() {
   const posts = await fetchPublishedPosts();
 
   return (
-    <div className='mx-auto max-w-3xl px-4 py-16 sm:px-6'>
-      <h1 className='text-foreground text-3xl font-bold tracking-tight'>
-        Blog
-      </h1>
-      <p className='text-muted-foreground mt-3 text-lg leading-relaxed'>
-        Practical notes on PDF tables, Excel exports, and operating a trustworthy
-        converter.
-      </p>
-      <ul className='mt-12 space-y-10'>
+    <>
+      <BlogIndexJsonLd posts={posts} />
+      <MarketingPageHeader
+        eyebrow='Resources'
+        title='Blog'
+        lead='Practical notes on PDF tables, Excel exports, and operating a trustworthy converter.'
+      />
+      <MarketingPageBody>
         {posts.length === 0 ? (
-          <li className='text-muted-foreground text-sm'>
-            No published posts yet. Add one from the dashboard.
-          </li>
+          <div className='border-border bg-card rounded-xl border p-8 text-center'>
+            <p className='text-muted-foreground text-sm'>
+              No published posts yet. Check back soon, or{' '}
+              <Link href='/' className='text-primary font-medium hover:underline'>
+                try the converter
+              </Link>
+              .
+            </p>
+          </div>
         ) : (
-          posts.map((post) => {
-            const dateRaw = post.published_at ?? post.updated_at;
-            const dateLabel = formatDate(dateRaw);
-            return (
-              <li key={post.slug}>
-                <article>
-                  {dateLabel && (
-                    <time
-                      dateTime={dateRaw ?? undefined}
-                      className='text-muted-foreground text-sm font-medium'>
-                      {dateLabel}
-                    </time>
-                  )}
-                  <h2 className='mt-1 text-xl font-semibold'>
-                    <Link
-                      href={`/blog/${post.slug}`}
-                      className='text-foreground hover:text-primary transition-colors'>
-                      {post.title}
-                    </Link>
-                  </h2>
-                  <p className='text-muted-foreground mt-2 leading-relaxed'>
-                    {post.meta_description}
-                  </p>
-                  <Link
-                    href={`/blog/${post.slug}`}
-                    className='text-primary mt-3 inline-block text-sm font-medium'>
-                    Read more
-                  </Link>
-                </article>
-              </li>
-            );
-          })
+          <ul className='grid gap-6 sm:grid-cols-1'>
+            {posts.map((post) => {
+              const dateRaw = post.published_at ?? post.updated_at;
+              const dateLabel = formatDate(dateRaw);
+              return (
+                <li key={post.slug}>
+                  <Card className='transition-shadow hover:shadow-md'>
+                    <CardHeader>
+                      {dateLabel && (
+                        <time
+                          dateTime={dateRaw ?? undefined}
+                          className='text-muted-foreground text-xs font-medium'>
+                          {dateLabel}
+                        </time>
+                      )}
+                      <CardTitle className='text-xl'>
+                        <Link
+                          href={`/blog/${post.slug}`}
+                          className='hover:text-primary transition-colors'>
+                          {post.title}
+                        </Link>
+                      </CardTitle>
+                      <CardDescription className='line-clamp-3 text-sm leading-relaxed'>
+                        {post.meta_description}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <Link
+                        href={`/blog/${post.slug}`}
+                        className='text-primary text-sm font-medium hover:underline'>
+                        Read article →
+                      </Link>
+                    </CardContent>
+                  </Card>
+                </li>
+              );
+            })}
+          </ul>
         )}
-      </ul>
-    </div>
+      </MarketingPageBody>
+    </>
   );
 }

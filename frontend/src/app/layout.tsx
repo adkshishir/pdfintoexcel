@@ -31,7 +31,8 @@ export const metadata: Metadata = {
     'spreadsheet',
   ],
   robots: {
-    index: false,
+    index: true,
+    follow: true,
   },
   openGraph: {
     type: 'website',
@@ -41,13 +42,16 @@ export const metadata: Metadata = {
     description:
       'Accurate PDF to Excel conversion with layout preservation for tables and scans.',
     url: 'https://pdfintoexcel.com',
+    images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'pdfintoexcel' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'pdfintoexcel — PDF to Excel',
     description:
       'Accurate PDF to Excel conversion with layout preservation for tables and scans.',
+    images: ['/opengraph-image'],
   },
+  manifest: '/manifest.webmanifest',
   icons: {
     icon: [{ url: '/icon.png', type: 'image/png', sizes: 'any' }],
     apple: [{ url: '/icon.png', type: 'image/png' }],
@@ -61,6 +65,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='en' className={inter.variable} suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('theme');var d=t==='dark'||(t!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.classList.toggle('dark',d)}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body className='flex min-h-screen flex-col'>
         <SiteJsonLd />
         <ExceflowThemeProvider>

@@ -5,8 +5,15 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: '*',
-        disallow: ['/'],
-        // disallow: ['/dashboard', '/dashboard/*', '/admin', '/admin/*', '/api', '/api/*'],
+        allow: '/',
+        disallow: [
+          '/dashboard',
+          '/dashboard/*',
+          '/api',
+          '/api/*',
+          '/auth',
+          '/auth/*',
+        ],
       },
     ],
     sitemap: 'https://pdfintoexcel.com/sitemap.xml',

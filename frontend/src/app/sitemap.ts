@@ -2,41 +2,44 @@ import type { MetadataRoute } from 'next';
 
 import { fetchPublishedPosts } from '@/lib/blog';
 import { getInternalApiBase } from '@/lib/internal-api';
+import { STATIC_SITEMAP_LAST_MODIFIED } from '@/lib/seo';
 
 /** Avoid calling the API during `next build` (no backend in the image build container). */
 export const dynamic = 'force-dynamic';
 
 const site = 'https://pdfintoexcel.com';
 
+const staticLastMod = STATIC_SITEMAP_LAST_MODIFIED;
+
 const staticPages: MetadataRoute.Sitemap = [
-  { url: site, lastModified: new Date(), changeFrequency: 'weekly', priority: 1 },
+  { url: site, lastModified: staticLastMod, changeFrequency: 'weekly', priority: 1 },
   {
     url: `${site}/blog`,
-    lastModified: new Date(),
+    lastModified: staticLastMod,
     changeFrequency: 'weekly',
     priority: 0.9,
   },
   {
     url: `${site}/about`,
-    lastModified: new Date(),
+    lastModified: staticLastMod,
     changeFrequency: 'yearly',
     priority: 0.7,
   },
   {
     url: `${site}/contact`,
-    lastModified: new Date(),
+    lastModified: staticLastMod,
     changeFrequency: 'yearly',
     priority: 0.7,
   },
   {
     url: `${site}/privacy`,
-    lastModified: new Date(),
+    lastModified: staticLastMod,
     changeFrequency: 'yearly',
     priority: 0.5,
   },
   {
     url: `${site}/terms`,
-    lastModified: new Date(),
+    lastModified: staticLastMod,
     changeFrequency: 'yearly',
     priority: 0.5,
   },

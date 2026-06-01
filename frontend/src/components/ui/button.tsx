@@ -12,6 +12,8 @@ const buttonVariants = cva(
         default:
           'bg-primary text-primary-foreground shadow-sm shadow-black/20 hover:brightness-105 hover:shadow-md hover:shadow-black/15',
         cta: 'rounded-lg bg-exceflow-cta text-exceflow-cta-foreground shadow-sm hover:brightness-105',
+        excel:
+          'rounded-lg bg-excel text-excel-foreground shadow-sm hover:bg-excel-dark',
         secondary:
           'bg-secondary text-secondary-foreground shadow-sm shadow-black/15 hover:brightness-105',
         outline:

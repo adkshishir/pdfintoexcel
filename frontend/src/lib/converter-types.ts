@@ -2,6 +2,8 @@ export type ConverterMode = 'fast' | 'accurate';
 export type ConverterOutputLayout = 'merged' | 'split';
 export type ConverterExtractionScope = 'tables_only' | 'full_document';
 export type ConverterFullDocumentPages = 'single_sheet' | 'per_page';
+export type ConverterDocumentType = 'normal' | 'scanned';
+export type ConverterImageExport = 'none' | 'figures' | 'only';
 export type ConverterJobStatus =
   | 'pending'
   | 'queued'
@@ -16,6 +18,8 @@ export interface ConverterJob {
   output_layout: ConverterOutputLayout;
   extraction_scope: ConverterExtractionScope;
   full_document_pages: ConverterFullDocumentPages;
+  document_type: ConverterDocumentType;
+  image_export: ConverterImageExport;
   filename: string;
   size_bytes: number;
   page_count: number | null;
