@@ -10,9 +10,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 RUN apt-get update && apt-get install -y --no-install-recommends \
         # libmagic — file-type sniffing (shared with API)
         libmagic1 \
-        # Tesseract OCR + English data
+        # Tesseract OCR + multilingual data (Nepali + Latin for bilingual PDFs)
         tesseract-ocr \
         tesseract-ocr-eng \
+        tesseract-ocr-nep \
         # Poppler — required by Camelot (pdftotext / pdfinfo)
         poppler-utils \
         # OpenCV runtime libs (libGL, libGthread) — pulled in by paddleocr
