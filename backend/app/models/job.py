@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from enum import StrEnum
 from typing import Any
 
-from sqlalchemy import JSON, BigInteger, DateTime, Index, Integer, String, Text, Uuid
+from sqlalchemy import JSON, BigInteger, Boolean, DateTime, Index, Integer, String, Text, Uuid
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.database import Base
@@ -43,6 +43,17 @@ class FullDocumentPages(StrEnum):
     PER_PAGE = "per_page"          # one worksheet per PDF page
 
 
+class DocumentType(StrEnum):
+    NORMAL = "normal"    # trust embedded PDF text when available
+    SCANNED = "scanned"  # always OCR rendered pages
+
+
+class ImageExport(StrEnum):
+    NONE = "none"        # no Figures sheet
+    FIGURES = "figures"  # append Figures sheet after main export
+    ONLY = "only"        # workbook contains only extracted images
+
+
 def _utcnow() -> datetime:
     return datetime.now(timezone.utc)
 
@@ -60,6 +71,16 @@ class Job(Base):
     )
     full_document_pages: Mapped[str] = mapped_column(
         String(20), nullable=False, default=FullDocumentPages.SINGLE_SHEET,
+    )
+
+    # trust_pdf_text=False → force OCR (user-facing document_type=scanned).
+    trust_pdf_text: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    # Legacy columns — not set on new jobs; OCR uses server defaults.
+    ocr_tesseract_langs: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    ocr_paddle_lang: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    ocr_auto_lang: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    image_export: Mapped[str] = mapped_column(
+        String(16), nullable=False, default=ImageExport.NONE,
     )
 
     input_url: Mapped[str] = mapped_column(Text, nullable=False)
@@ -88,6 +109,10 @@ class Job(Base):
         Index("jobs_expires_at_idx", "expires_at", postgresql_where="status = 'completed'"),
     )
 
+    @property
+    def document_type(self) -> str:
+        return DocumentType.NORMAL if self.trust_pdf_text else DocumentType.SCANNED
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "id":           str(self.id),
@@ -96,6 +121,8 @@ class Job(Base):
             "output_layout": self.output_layout,
             "extraction_scope": self.extraction_scope,
             "full_document_pages": self.full_document_pages,
+            "document_type": self.document_type,
+            "image_export": self.image_export,
             "filename":     self.filename,
             "size_bytes":   self.size_bytes,
             "page_count":   self.page_count,

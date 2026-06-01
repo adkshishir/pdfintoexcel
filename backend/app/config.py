@@ -63,6 +63,9 @@ class Settings(BaseSettings):
     # --- pipeline ---
     default_mode: Literal["fast", "accurate"] = "fast"
     ocr_engine: Literal["paddle", "tesseract"] = "paddle"
+    # Default OCR languages (see app.ocr.lang_resolve).
+    ocr_default_tesseract_lang: str = "eng"
+    ocr_default_paddle_lang: str = "en"
 
 
 @lru_cache

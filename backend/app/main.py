@@ -3,7 +3,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import admin_auth, admin_blog, admin_seo, analytics, blog, health, jobs, landing
+from app.api import admin_auth, admin_blog, admin_seo, analytics, blog, health, job_ws, jobs, landing
 from app.config import get_settings
 
 
@@ -46,6 +46,7 @@ def create_app() -> FastAPI:
     app.include_router(admin_blog.router, prefix="/api")
     app.include_router(admin_seo.router, prefix="/api")
     app.include_router(jobs.router, prefix="/api")
+    app.include_router(job_ws.router, prefix="/api")
     return app
 
 

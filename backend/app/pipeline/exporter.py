@@ -30,7 +30,7 @@ try:
 except ImportError:
     _DATEUTIL = False
 
-from app.pipeline.types import CleanTable, ColumnType, WordBox
+from app.pipeline.types import CleanTable, ColumnType, ImageExport, WordBox
 
 # Y-grouping tolerance for preamble line reconstruction (pt).
 _PRE_LINE_TOL = 8.0
@@ -64,6 +64,9 @@ def export_excel(
     preamble_boxes: list[WordBox] | None = None,
     preamble_images: list[dict] | None = None,
     footer_lines: list[str] | None = None,
+    image_export: ImageExport = "none",
+    pdf_path: Path | None = None,
+    export_metrics: dict | None = None,
 ) -> None:
     wb = Workbook()
     default_sheet = wb.active
@@ -71,6 +74,12 @@ def export_excel(
     if not tables:
         default_sheet.title = "empty"
         default_sheet["A1"] = "No tables were detected in this document."
+        if image_export == "figures" and pdf_path is not None:
+            from app.pipeline.figures_sheet import append_figures_sheet_from_pdf
+
+            st = append_figures_sheet_from_pdf(wb, pdf_path)
+            if export_metrics is not None:
+                export_metrics.update({f"figures_{k}": v for k, v in st.items()})
         wb.save(output_path)
         return
 
@@ -137,6 +146,13 @@ def export_excel(
         data_sheets = [n for n in wb.sheetnames if not n.startswith("_conf_")]
         if data_sheets:
             _write_footer(wb[data_sheets[-1]], footer_lines)
+
+    if image_export == "figures" and pdf_path is not None:
+        from app.pipeline.figures_sheet import append_figures_sheet_from_pdf
+
+        st = append_figures_sheet_from_pdf(wb, pdf_path)
+        if export_metrics is not None:
+            export_metrics.update({f"figures_{k}": v for k, v in st.items()})
 
     wb.save(output_path)
 

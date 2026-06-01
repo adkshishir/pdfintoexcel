@@ -39,6 +39,7 @@ from openpyxl.styles import Font
 from openpyxl.utils import get_column_letter
 
 from app.pipeline.exporter import _safe_sheet_name
+from app.pipeline.pdf_images import extract_pdf_images as _extract_pdf_images
 from app.pipeline.types import OutputLayout, WordBox
 
 log = logging.getLogger(__name__)
@@ -539,79 +540,7 @@ def _apply_bold_zone(ws, row_start: int, row_end: int) -> None:
                 cell.font = bold
 
 
-# ======================================================================
-# Image extraction (PyMuPDF)
-# ======================================================================
-
-def _extract_pdf_images(pdf_path: Path) -> dict[int, list[dict]]:
-    """Extract embedded raster images from a PDF via PyMuPDF.
-
-    Returns {page_idx: [{data, bbox, ext}, …]}.
-    bbox is (x0, y0, x1, y1) in PDF user-space points.
-    """
-    result: dict[int, list[dict]] = {}
-    try:
-        import fitz
-    except ImportError:
-        log.warning("PyMuPDF not available — skipping image extraction")
-        return result
-
-    try:
-        doc = fitz.open(str(pdf_path))
-    except Exception as exc:
-        log.warning("fitz.open failed for %s: %s", pdf_path, exc)
-        return result
-
-    try:
-        for page_idx in range(len(doc)):
-            page   = doc[page_idx]
-            images: list[dict] = []
-            for img_item in page.get_images(full=True):
-                xref = img_item[0]
-                try:
-                    raw      = doc.extract_image(xref)
-                    bbox_r   = _get_image_bbox(page, img_item)
-                    if bbox_r is None:
-                        continue
-                    images.append({
-                        "data": raw["image"],
-                        "ext":  raw.get("ext", "png"),
-                        "bbox": (
-                            float(bbox_r.x0), float(bbox_r.y0),
-                            float(bbox_r.x1), float(bbox_r.y1),
-                        ),
-                    })
-                except Exception as exc:
-                    log.debug("skip image xref %d page %d: %s", xref, page_idx, exc)
-            if images:
-                result[page_idx] = images
-    finally:
-        doc.close()
-
-    log.info(
-        "image extraction: %d images across %d pages",
-        sum(len(v) for v in result.values()), len(result),
-    )
-    return result
-
-
-def _get_image_bbox(page, img_item):
-    try:
-        return page.get_image_bbox(img_item)
-    except TypeError:
-        pass
-    try:
-        return page.get_image_bbox(img_item[0])
-    except Exception:
-        pass
-    try:
-        for block in page.get_text("rawdict")["blocks"]:
-            if block.get("type") == 1 and block.get("number") == img_item[0]:
-                import fitz
-                return fitz.Rect(block["bbox"])
-    except Exception:
-        pass
-    return None
+# Image bytes: see pdf_images.extract_pdf_images (used as _extract_pdf_images).
 
 
 def _insert_image(ws, img_info: dict, row_offset: int = 0) -> None:

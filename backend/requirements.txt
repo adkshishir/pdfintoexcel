@@ -54,6 +54,9 @@ python-magic==0.4.27
 # --- date parsing ---
 python-dateutil>=2.9.0   # already a transitive dep of pandas; made explicit here
 
+# --- OCR language auto-detect (sample PDF text layer → tess hints) ---
+langdetect==1.0.9
+
 # --- dev ---
 pytest==8.3.4
 pytest-asyncio==0.25.0

@@ -20,19 +20,21 @@ from app.pipeline.types import WordBox
 log = logging.getLogger(__name__)
 
 _paddle_lock = Lock()
-_paddle_instance = None
+_paddle_by_lang: dict[str, object] = {}
 
 
 def _get_paddle(lang: str):  # noqa: ANN202 — paddleocr typed lazily
-    """Lazy + cached singleton. PaddleOCR initialization is expensive (~3s)."""
-    global _paddle_instance
-    if _paddle_instance is None:
-        with _paddle_lock:
-            if _paddle_instance is None:
-                # Local import — paddleocr is heavy and unavailable in the API container.
-                from paddleocr import PaddleOCR
-                _paddle_instance = PaddleOCR(use_angle_cls=True, lang=lang, show_log=False)
-    return _paddle_instance
+    """Lazy + cached per language. Initialization is expensive (~3s each)."""
+    key = (lang or "en").strip() or "en"
+    inst = _paddle_by_lang.get(key)
+    if inst is not None:
+        return inst
+    with _paddle_lock:
+        if key not in _paddle_by_lang:
+            from paddleocr import PaddleOCR
+
+            _paddle_by_lang[key] = PaddleOCR(use_angle_cls=True, lang=key, show_log=False)
+    return _paddle_by_lang[key]
 
 
 class PaddleEngine(OcrEngine):
@@ -59,14 +61,16 @@ class PaddleEngine(OcrEngine):
             ys = [p[1] for p in poly]
             x0, x1 = min(xs), max(xs)
             y0, y1 = min(ys), max(ys)
-            boxes.append(WordBox(
-                text=text,
-                x=float(x0),
-                y=float(y0),
-                w=float(x1 - x0),
-                h=float(y1 - y0),
-                page=page_index,
-                confidence=float(conf),
-            ))
+            boxes.append(
+                WordBox(
+                    text=text,
+                    x=float(x0),
+                    y=float(y0),
+                    w=float(x1 - x0),
+                    h=float(y1 - y0),
+                    page=page_index,
+                    confidence=float(conf),
+                )
+            )
         log.debug("paddle page %d: %d boxes", page_index, len(boxes))
         return boxes

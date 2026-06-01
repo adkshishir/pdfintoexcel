@@ -40,7 +40,7 @@ from app.pipeline.exporter import (
     _infer_dayfirst_flags,
     _safe_sheet_name,
 )
-from app.pipeline.types import CleanTable, ContentBlock, DocumentContent
+from app.pipeline.types import CleanTable, ContentBlock, DocumentContent, ImageExport
 
 # ---------------------------------------------------------------------------
 # Style constants
@@ -67,6 +67,10 @@ _KV_RE = re.compile(r"^(.{1,50}):\s+(.+)$")   # detect "Key: Value" lines
 def export_structured_document(
     content: DocumentContent,
     output_path: Path,
+    *,
+    image_export: ImageExport = "none",
+    pdf_path: Path | None = None,
+    export_metrics: dict | None = None,
 ) -> int:
     """Write DocumentContent to a structured Excel workbook.
 
@@ -78,6 +82,12 @@ def export_structured_document(
     _populate_structured_worksheet(ws, content)
     n_cols = max(6, _doc_col_count(content))
     _set_col_widths(ws, n_cols, content)
+    if image_export == "figures" and pdf_path is not None:
+        from app.pipeline.figures_sheet import append_figures_sheet_from_pdf
+
+        st = append_figures_sheet_from_pdf(wb, pdf_path)
+        if export_metrics is not None:
+            export_metrics.update({f"figures_{k}": v for k, v in st.items()})
     wb.save(output_path)
     return max(1, ws.max_row or 1)
 
@@ -85,6 +95,10 @@ def export_structured_document(
 def export_structured_document_per_page(
     content: DocumentContent,
     output_path: Path,
+    *,
+    image_export: ImageExport = "none",
+    pdf_path: Path | None = None,
+    export_metrics: dict | None = None,
 ) -> int:
     """Same structured layout as `export_structured_document`, one sheet per PDF page.
 
@@ -116,6 +130,13 @@ def export_structured_document_per_page(
             total_rows += max(1, ws.max_row or 1)
         n_cols = max(6, _doc_col_count(sub))
         _set_col_widths(ws, n_cols, sub)
+
+    if image_export == "figures" and pdf_path is not None:
+        from app.pipeline.figures_sheet import append_figures_sheet_from_pdf
+
+        st = append_figures_sheet_from_pdf(wb, pdf_path)
+        if export_metrics is not None:
+            export_metrics.update({f"figures_{k}": v for k, v in st.items()})
 
     wb.save(output_path)
     return total_rows

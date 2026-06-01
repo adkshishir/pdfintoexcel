@@ -32,7 +32,7 @@ def extract_ocr(
     *,
     mode: Mode = "fast",
     page_indices: list[int] | None = None,
-    recognizer: Callable[[Path, int], list[WordBox]] = recognize_with_fallback,
+    recognizer: Callable[..., list[WordBox]] = recognize_with_fallback,
 ) -> tuple[list[WordBox], int]:
     """Return (all_word_boxes, page_count).
 

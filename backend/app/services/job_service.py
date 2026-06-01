@@ -17,6 +17,7 @@ from app.config import get_settings
 from app.models.job import (
     ExtractionScope,
     FullDocumentPages,
+    ImageExport,
     Job,
     JobMode,
     JobStatus,
@@ -47,6 +48,8 @@ def create_job(
     output_layout: OutputLayout = OutputLayout.MERGED,
     extraction_scope: ExtractionScope = ExtractionScope.TABLES_ONLY,
     full_document_pages: FullDocumentPages = FullDocumentPages.SINGLE_SHEET,
+    trust_pdf_text: bool = True,
+    image_export: ImageExport = ImageExport.NONE,
 ) -> Job:
     """Persist file to storage, create a row in `queued` state, return it.
 
@@ -67,6 +70,8 @@ def create_job(
         output_layout=output_layout,
         extraction_scope=extraction_scope,
         full_document_pages=full_document_pages,
+        trust_pdf_text=trust_pdf_text,
+        image_export=image_export,
         input_url=key,
         filename=filename,
         size_bytes=size_bytes,
@@ -81,6 +86,16 @@ def create_job(
 
 def get_job(db: Session, job_id: uuid.UUID) -> Job | None:
     return db.execute(select(Job).where(Job.id == job_id)).scalar_one_or_none()
+
+
+def notify_job_subscribers(db: Session, job_id: uuid.UUID) -> None:
+    """Push current job row to Redis (for WebSocket clients)."""
+    job = get_job(db, job_id)
+    if job is None:
+        return
+    from app.queue.job_events import publish_job_update
+
+    publish_job_update(job_id, job.to_dict())
 
 
 def mark_processing(db: Session, job_id: uuid.UUID) -> None:

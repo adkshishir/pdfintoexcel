@@ -12,7 +12,7 @@ PDF-page-height-aware flip.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Literal
+from typing import Any, Literal
 
 
 PdfType = Literal["digital", "scanned", "hybrid"]
@@ -25,6 +25,7 @@ OutputLayout = Literal["merged", "split"]
 ExtractionScope = Literal["tables_only", "full_document"]
 # full_document only: one worksheet vs one worksheet per PDF page
 FullDocumentPages = Literal["single_sheet", "per_page"]
+ImageExport = Literal["none", "figures", "only"]
 
 
 @dataclass(frozen=True)
@@ -127,3 +128,5 @@ class PipelineResult:
     timings_ms: dict[str, int] = field(default_factory=dict)
     # Set when extraction_scope=full_document (layout export row count).
     layout_row_count: int | None = None
+    # Figures sheet stats, effective OCR langs, etc. (merged into job.metrics).
+    export_metrics: dict[str, Any] = field(default_factory=dict)

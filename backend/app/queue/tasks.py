@@ -47,11 +47,15 @@ def process_job(self, job_id: str) -> dict:  # noqa: ANN001
             log.warning("process_job: job %s not found, dropping", jid)
             return {"job_id": job_id, "status": "missing"}
         job_service.mark_processing(db, jid)
+        job_service.notify_job_subscribers(db, jid)
         input_key = job.input_url
         mode = job.mode
         output_layout = job.output_layout
         extraction_scope = job.extraction_scope
         full_document_pages = job.full_document_pages
+        trust_pdf_text = job.trust_pdf_text
+        image_export = job.image_export
+        document_type = job.document_type
 
     try:
         from app.pipeline.orchestrator import run_pipeline
@@ -72,12 +76,16 @@ def process_job(self, job_id: str) -> dict:  # noqa: ANN001
                 output_layout=output_layout,
                 extraction_scope=extraction_scope,
                 full_document_pages=full_document_pages,
+                trust_pdf_text=trust_pdf_text,
+                image_export=image_export,
             )
             with tmp_path.open("rb") as fh:
                 storage.put(out_key, fh, content_type=
                             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
         finally:
             tmp_path.unlink(missing_ok=True)
+
+        em = result.export_metrics
 
         with session_scope() as db:
             job_service.mark_completed(
@@ -92,30 +100,33 @@ def process_job(self, job_id: str) -> dict:  # noqa: ANN001
                     "elapsed_ms": int((time.time() - started) * 1000),
                     "extraction_scope": extraction_scope,
                     "full_document_pages": full_document_pages,
+                    "document_type": document_type,
+                    "image_export": image_export,
                     **({"layout_row_count": result.layout_row_count} if result.layout_row_count is not None else {}),
+                    **em,
                 },
             )
+            job_service.notify_job_subscribers(db, jid)
         return {"job_id": job_id, "status": "completed"}
 
     except SoftTimeLimitExceeded:
-        # Soft limit fires `job_timeout_seconds` into processing. We have a
-        # ~60s grace window before Celery hard-kills the worker — use it to
-        # mark the job failed cleanly instead of leaving it in PROCESSING.
         log.warning("process_job %s exceeded soft time limit", jid)
         with session_scope() as db:
             job_service.mark_failed(db, jid, error="TIMEOUT: pipeline exceeded job_timeout_seconds")
+            job_service.notify_job_subscribers(db, jid)
         return {"job_id": job_id, "status": "failed", "reason": "timeout"}
 
     except NotImplementedError as e:
-        # Tells ops "the right code path isn't built yet" vs an unexpected fault.
         with session_scope() as db:
             job_service.mark_failed(db, jid, error=f"PIPELINE_NOT_IMPLEMENTED: {e}")
+            job_service.notify_job_subscribers(db, jid)
         return {"job_id": job_id, "status": "failed", "reason": "not_implemented"}
 
     except Exception as e:
         log.exception("process_job %s failed", jid)
         with session_scope() as db:
             job_service.mark_failed(db, jid, error=f"{type(e).__name__}: {e}")
+            job_service.notify_job_subscribers(db, jid)
         return {"job_id": job_id, "status": "failed", "reason": "exception"}
 
 

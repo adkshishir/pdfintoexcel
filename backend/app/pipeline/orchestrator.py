@@ -24,6 +24,15 @@ Where RawTable[] comes from:
       Use `full_document_pages`: `single_sheet` (default) or `per_page` (one
       worksheet per PDF page; footer only on the last sheet).
 
+`trust_pdf_text` (API: ``document_type=normal`` vs ``scanned``):
+    - Default `True` — embedded text from digital PDFs flows through pdfplumber.
+    - When `False`, WordBox[] always come from OCR on rendered pages (scanned PDFs).
+
+`image_export`:
+    - ``none`` — no Figures sheet (preamble inline images unchanged for tables_only).
+    - ``figures`` — append a capped ``Figures`` worksheet after the main export.
+    - ``only`` — workbook contains only extracted images; skips table/OCR pipeline.
+
 Footer-word filtering (tables_only only)
 -----------------------------------------
 Footer words are detected BEFORE table reconstruction and stripped from the
@@ -36,8 +45,10 @@ from __future__ import annotations
 
 import logging
 import time
+from functools import partial
 from pathlib import Path
 
+from app.ocr import recognize_with_fallback
 from app.pipeline.cleaner import clean_tables
 from app.pipeline.detector import detect_pdf_type
 from app.pipeline.digital_words import extract_digital_words
@@ -47,6 +58,7 @@ from app.pipeline.pdfplumber_tables import extract_pdfplumber_tables
 from app.pipeline.types import (
     ExtractionScope,
     FullDocumentPages,
+    ImageExport,
     Mode,
     OutputLayout,
     PipelineResult,
@@ -65,8 +77,27 @@ def run_pipeline(
     output_layout: OutputLayout = "merged",
     extraction_scope: ExtractionScope = "tables_only",
     full_document_pages: FullDocumentPages = "single_sheet",
+    trust_pdf_text: bool = True,
+    image_export: ImageExport = "none",
 ) -> PipelineResult:
     timings: dict[str, int] = {}
+    export_metrics: dict = {}
+
+    from app.ocr.lang_resolve import resolve_paddle_lang, resolve_tesseract_langs
+
+    tess_eff = resolve_tesseract_langs(None)
+    paddle_eff = resolve_paddle_lang(None, tess_eff)
+    export_metrics["ocr_tesseract_langs_effective"] = tess_eff
+    export_metrics["ocr_paddle_lang_effective"] = paddle_eff
+
+    if image_export == "only":
+        return _export_images_only(pdf_path, output_path, export_metrics=export_metrics)
+
+    ocr_recognizer = partial(
+        recognize_with_fallback,
+        tesseract_langs=tess_eff,
+        paddle_lang=paddle_eff,
+    )
 
     t0 = time.time()
     detection = detect_pdf_type(pdf_path)
@@ -76,12 +107,15 @@ def run_pipeline(
         detection.pdf_type, detection.page_count, detection.pages_with_text,
     )
 
-    boxes, page_count = _collect_boxes(pdf_path, detection, mode, timings)
+    boxes, page_count = _collect_boxes(
+        pdf_path, detection, mode, timings,
+        trust_pdf_text=trust_pdf_text,
+        recognizer=ocr_recognizer,
+    )
 
     layout_row_count: int | None = None
     if extraction_scope == "full_document":
         from app.pipeline.content_classifier import classify_document
-        from app.pipeline.structured_exporter import export_structured_document
 
         # Run footer detection + table extraction (same quality path as tables_only).
         t_fd = time.time()
@@ -90,7 +124,10 @@ def run_pipeline(
         timings["footer_detect_ms"] = _ms_since(t_fd)
 
         if detection.pdf_type == "digital":
-            raw = _extract_digital_tables(pdf_path, page_count, timings, all_boxes=table_boxes)
+            raw = _extract_digital_tables(
+                pdf_path, page_count, timings, all_boxes=table_boxes,
+                trust_pdf_text=trust_pdf_text,
+            )
         else:
             t_recon = time.time()
             raw = reconstruct_tables(table_boxes, page_count)
@@ -109,9 +146,21 @@ def run_pipeline(
         content = classify_document(boxes, raw, clean, page_count, pdf_path=pdf_path)
         if full_document_pages == "per_page":
             from app.pipeline.structured_exporter import export_structured_document_per_page
-            layout_row_count = export_structured_document_per_page(content, output_path)
+            layout_row_count = export_structured_document_per_page(
+                content, output_path,
+                image_export=image_export,
+                pdf_path=pdf_path,
+                export_metrics=export_metrics,
+            )
         else:
-            layout_row_count = export_structured_document(content, output_path)
+            from app.pipeline.structured_exporter import export_structured_document
+
+            layout_row_count = export_structured_document(
+                content, output_path,
+                image_export=image_export,
+                pdf_path=pdf_path,
+                export_metrics=export_metrics,
+            )
         timings["export_ms"] = _ms_since(t_classify)
         log.info("full_document structured export: %d rows", layout_row_count)
     else:
@@ -133,6 +182,7 @@ def run_pipeline(
         if detection.pdf_type == "digital":
             raw = _extract_digital_tables(
                 pdf_path, page_count, timings, all_boxes=table_boxes,
+                trust_pdf_text=trust_pdf_text,
             )
         else:
             t_recon = time.time()
@@ -157,6 +207,9 @@ def run_pipeline(
             preamble_boxes=preamble_boxes,
             preamble_images=preamble_images,
             footer_lines=footer_lines,
+            image_export=image_export,
+            pdf_path=pdf_path,
+            export_metrics=export_metrics,
         )
         timings["export_ms"] = _ms_since(t_export)
 
@@ -171,13 +224,64 @@ def run_pipeline(
         mean_confidence=mean_conf,
         timings_ms=timings,
         layout_row_count=layout_row_count,
+        export_metrics=export_metrics,
+    )
+
+
+def _export_images_only(
+    pdf_path: Path,
+    output_path: Path,
+    *,
+    export_metrics: dict,
+) -> PipelineResult:
+    """Build a workbook containing only the Figures sheet (or a placeholder)."""
+    from openpyxl import Workbook
+
+    from app.pipeline.detector import detect_pdf_type
+    from app.pipeline.figures_sheet import append_figures_sheet_from_pdf
+
+    detection = detect_pdf_type(pdf_path)
+    wb = Workbook()
+    default = wb.active
+    default.title = "empty"
+    default["A1"] = "Extracting embedded images…"
+    stats = append_figures_sheet_from_pdf(wb, pdf_path)
+    export_metrics.update({f"figures_{k}": v for k, v in stats.items()})
+    if "Figures" in wb.sheetnames and default.title == "empty":
+        wb.remove(default)
+    elif "Figures" not in wb.sheetnames:
+        default["A1"] = "No embedded images were found in this document."
+    wb.save(output_path)
+    return PipelineResult(
+        pdf_type=detection.pdf_type,
+        tables=[],
+        page_count=detection.page_count,
+        mean_confidence=0.0,
+        timings_ms={},
+        export_metrics=export_metrics,
     )
 
 
 # ---- box collection ---------------------------------------------------
 
-def _collect_boxes(pdf_path, detection, mode, timings) -> tuple[list[WordBox], int]:
+def _collect_boxes(
+    pdf_path,
+    detection,
+    mode,
+    timings,
+    *,
+    trust_pdf_text: bool,
+    recognizer,
+) -> tuple[list[WordBox], int]:
     """Route each page to the right extraction source and combine."""
+    if not trust_pdf_text:
+        # Some digital PDFs ship a broken Unicode mapping for non-Latin scripts
+        # while Latin text looks fine — render + OCR recovers glyphs users see.
+        t = time.time()
+        boxes, page_count = extract_ocr(pdf_path, mode=mode, recognizer=recognizer)
+        timings["ocr_ms"] = _ms_since(t)
+        return boxes, page_count
+
     if detection.pdf_type == "digital":
         t = time.time()
         boxes, page_count = extract_digital_words(pdf_path)
@@ -186,7 +290,7 @@ def _collect_boxes(pdf_path, detection, mode, timings) -> tuple[list[WordBox], i
 
     if detection.pdf_type == "scanned":
         t = time.time()
-        boxes, page_count = extract_ocr(pdf_path, mode=mode)
+        boxes, page_count = extract_ocr(pdf_path, mode=mode, recognizer=recognizer)
         timings["ocr_ms"] = _ms_since(t)
         return boxes, page_count
 
@@ -204,7 +308,9 @@ def _collect_boxes(pdf_path, detection, mode, timings) -> tuple[list[WordBox], i
 
     if scan_pages:
         t = time.time()
-        ocr_boxes, _ = extract_ocr(pdf_path, mode=mode, page_indices=scan_pages)
+        ocr_boxes, _ = extract_ocr(
+            pdf_path, mode=mode, page_indices=list(scan_pages), recognizer=recognizer,
+        )
         timings["ocr_ms"] = _ms_since(t)
     else:
         ocr_boxes = []
@@ -220,6 +326,7 @@ def _extract_digital_tables(
     timings: dict[str, int],
     *,
     all_boxes: list | None = None,
+    trust_pdf_text: bool = True,
 ) -> list:
     """Two-tier extraction for digital PDFs.
 
@@ -236,7 +343,10 @@ def _extract_digital_tables(
     words already removed).
     """
     t = time.time()
-    tier1 = extract_pdfplumber_tables(pdf_path)
+    if trust_pdf_text:
+        tier1 = extract_pdfplumber_tables(pdf_path)
+    else:
+        tier1 = []
     timings["tier1_ms"] = _ms_since(t)
     tier1_pages = {tbl.page for tbl in tier1}
 
@@ -398,36 +508,10 @@ def _extract_page_images(
     page_idx: int,
     max_y: float,
 ) -> list[dict]:
-    """Extract images from *page_idx* with top-edge y < max_y via PyMuPDF."""
-    try:
-        import fitz
-    except ImportError:
-        return []
-    try:
-        doc  = fitz.open(str(pdf_path))
-        page = doc[page_idx]
-        imgs: list[dict] = []
-        for item in page.get_images(full=True):
-            xref = item[0]
-            try:
-                bbox_r = page.get_image_bbox(item)
-                if bbox_r is None or float(bbox_r.y0) >= max_y:
-                    continue
-                raw = doc.extract_image(xref)
-                imgs.append({
-                    "data": raw["image"],
-                    "ext":  raw.get("ext", "png"),
-                    "bbox": (
-                        float(bbox_r.x0), float(bbox_r.y0),
-                        float(bbox_r.x1), float(bbox_r.y1),
-                    ),
-                })
-            except Exception:
-                pass
-        doc.close()
-        return imgs
-    except Exception:
-        return []
+    """Extract images from *page_idx* with top-edge y < max_y (merged tiles)."""
+    from app.pipeline.pdf_images import extract_page_images
+
+    return extract_page_images(pdf_path, page_idx, max_y=max_y, max_per_page=None)
 
 
 # ---- helpers ----------------------------------------------------------
