@@ -25,13 +25,15 @@ function NavLinks({
   pathname,
   onNavigate,
   className,
+  linkClassName,
 }: {
   pathname: string;
   onNavigate?: () => void;
   className?: string;
+  linkClassName?: string;
 }) {
   return (
-    <>
+    <div className={className}>
       {HEADER_NAV_ITEMS.map((item) => {
         const active = isNavActive(pathname, item.href);
         return (
@@ -40,17 +42,17 @@ function NavLinks({
             href={item.href}
             onClick={onNavigate}
             className={cn(
-              'text-sm transition-colors duration-200',
+              'transition-colors duration-200',
               active
                 ? 'text-primary font-semibold'
                 : 'text-muted-foreground hover:text-foreground font-medium',
-              className,
+              linkClassName,
             )}>
             {item.label}
           </Link>
         );
       })}
-    </>
+    </div>
   );
 }
 
@@ -59,35 +61,49 @@ export function SiteHeaderNav() {
   const [open, setOpen] = useState(false);
 
   return (
-    <>
-      <nav className='hidden items-center gap-6 md:flex lg:gap-8'>
-        <NavLinks pathname={pathname} />
+    <div className='flex items-center'>
+      {/* Desktop */}
+      <nav
+        className='hidden items-center gap-6 md:flex lg:gap-8'
+        aria-label='Main navigation'>
+        <NavLinks
+          pathname={pathname}
+          className='flex items-center gap-6 lg:gap-8'
+          linkClassName='text-sm'
+        />
       </nav>
 
+      {/* Mobile — hamburger always visible below md */}
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
           <Button
             type='button'
-            variant='ghost'
+            variant='outline'
             size='icon'
-            className='md:hidden'
-            aria-label='Open menu'>
-            <Menu className='size-5' />
+            className='text-foreground border-border hover:bg-accent flex size-10 shrink-0 md:hidden'
+            aria-label='Open navigation menu'
+            aria-expanded={open}
+            aria-controls='mobile-site-nav'>
+            <Menu className='size-5' strokeWidth={2} aria-hidden />
           </Button>
         </SheetTrigger>
-        <SheetContent side='right' className='flex flex-col gap-6'>
-          <SheetHeader>
-            <SheetTitle>Menu</SheetTitle>
+        <SheetContent
+          id='mobile-site-nav'
+          side='right'
+          className='flex w-[min(100vw,20rem)] flex-col gap-6'>
+          <SheetHeader className='text-left'>
+            <SheetTitle>Navigation</SheetTitle>
           </SheetHeader>
-          <nav className='flex flex-col gap-4'>
+          <nav className='flex flex-col gap-1' aria-label='Mobile navigation'>
             <NavLinks
               pathname={pathname}
               onNavigate={() => setOpen(false)}
-              className='py-1 text-base'
+              className='flex flex-col gap-1'
+              linkClassName='rounded-lg px-3 py-3 text-base'
             />
           </nav>
         </SheetContent>
       </Sheet>
-    </>
+    </div>
   );
 }

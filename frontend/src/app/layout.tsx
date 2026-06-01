@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 
 import { ExceflowThemeProvider } from '@/components/exceflow/exceflow-theme-provider';
@@ -12,6 +12,15 @@ const inter = Inter({
   variable: '--font-inter',
   display: 'swap',
 });
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#107C41' },
+    { media: '(prefers-color-scheme: dark)', color: '#0f1114' },
+  ],
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://pdfintoexcel.com'),
