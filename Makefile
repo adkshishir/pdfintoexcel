@@ -18,10 +18,14 @@ help:  ## list targets
 ## ---- dev (compose) ----
 up:           ## start the dev stack (rebuild if needed)
 	$(COMPOSE) up --build -d
+up-no-nginx:  ## start dev stack without docker nginx
+	$(COMPOSE_BASE) -f infrastructure/docker-compose.dev-host-ports.yml up --build -d
 down:         ## stop the dev stack (keeps volumes)
 	$(COMPOSE) down
 restart:      ## restart all services
 	$(COMPOSE) restart
+restart-no-nginx: ## restart dev services (no docker nginx)
+	$(COMPOSE_BASE) -f infrastructure/docker-compose.dev-host-ports.yml restart
 logs:         ## tail logs from all services (Ctrl-C to detach)
 	$(COMPOSE) logs -f --tail=200
 ps:           ## list running services
@@ -56,6 +60,10 @@ prod-up:      ## start the prod stack
 	$(COMPOSE_PROD) up --build -d
 prod-down:    ## stop the prod stack (keeps volumes)
 	$(COMPOSE_PROD) down
+prod-restart: ## restart the prod stack
+	$(COMPOSE_PROD) restart
+prod-restart-app: ## restart only prod frontend + backend
+	$(COMPOSE_PROD) restart frontend backend
 prod-logs:    ## tail prod logs
 	$(COMPOSE_PROD) logs -f --tail=200
 prod-migrate: ## alembic upgrade on prod stack (after deploy or new migrations)
