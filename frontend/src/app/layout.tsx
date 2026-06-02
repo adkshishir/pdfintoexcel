@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
+import localFont from 'next/font/local';
 
 import { ExceflowThemeProvider } from '@/components/exceflow/exceflow-theme-provider';
 import { SiteJsonLd } from '@/components/seo/site-json-ld';
@@ -7,10 +7,11 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 
 import './globals.css';
 
-const inter = Inter({
-  subsets: ['latin'],
+const inter = localFont({
+  src: '../fonts/inter-latin.woff2',
   variable: '--font-inter',
   display: 'swap',
+  weight: '100 900',
 });
 
 export const viewport: Viewport = {
