@@ -31,7 +31,10 @@ export function useJobWebSocket(
   },
 ) {
   const callbacksRef = useRef(callbacks);
-  callbacksRef.current = callbacks;
+
+  useEffect(() => {
+    callbacksRef.current = callbacks;
+  });
 
   useEffect(() => {
     if (!enabled || !jobId) return;

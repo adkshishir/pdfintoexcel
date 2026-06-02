@@ -6,7 +6,7 @@ import {
   Check,
   FileSpreadsheet,
   FileText,
-  Image,
+  Image as ImageIcon,
   Loader2,
   ScanLine,
   Table2,
@@ -231,7 +231,7 @@ function CompactConfig({
                   ? 'border-excel bg-excel text-white'
                   : 'border-border text-foreground hover:border-primary/40 bg-card',
               )}>
-              {id !== 'none' && <Image className='size-4' />}
+              {id !== 'none' && <ImageIcon className='size-4' aria-hidden />}
               {label}
             </button>
           ))}
