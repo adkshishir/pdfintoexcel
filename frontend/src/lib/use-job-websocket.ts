@@ -56,7 +56,16 @@ export function useJobWebSocket(
       }
     }
 
-    async function restFallback() {
+    let pollTimer: ReturnType<typeof setInterval> | null = null;
+
+    function stopPolling() {
+      if (pollTimer !== null) {
+        clearInterval(pollTimer);
+        pollTimer = null;
+      }
+    }
+
+    async function pollOnce() {
       try {
         const res = await fetch(`${API_BASE}/jobs/${jobId}`);
         if (!res.ok) return;
@@ -64,6 +73,7 @@ export function useJobWebSocket(
         if (activeGeneration !== generation) return;
         callbacksRef.current.onUpdate(job);
         if (TERMINAL.has(job.status)) {
+          stopPolling();
           callbacksRef.current.onTerminal(job);
         }
       } catch {
@@ -71,16 +81,19 @@ export function useJobWebSocket(
       }
     }
 
+    function startPolling() {
+      if (pollTimer !== null) return;
+      void pollOnce();
+      pollTimer = setInterval(() => void pollOnce(), 2000);
+    }
+
     const url = jobWebSocketUrl(jobId);
     if (!url) return;
 
     try {
       ws = new WebSocket(url);
-    } catch (e) {
-      void restFallback();
-      callbacksRef.current.onError(
-        e instanceof Error ? e.message : 'WebSocket connection failed',
-      );
+    } catch {
+      startPolling();
       return;
     }
 
@@ -101,18 +114,19 @@ export function useJobWebSocket(
 
     ws.onerror = () => {
       if (activeGeneration !== generation || closed) return;
-      void restFallback();
+      startPolling();
     };
 
     ws.onclose = (ev) => {
       if (activeGeneration !== generation || closed) return;
       if (ev.code !== 1000) {
-        void restFallback();
+        startPolling();
       }
     };
 
     return () => {
       activeGeneration = null;
+      stopPolling();
       cleanupSocket(1000, 'unmount');
     };
   }, [jobId, enabled]);
