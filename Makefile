@@ -10,7 +10,7 @@ COMPOSE_PROD := $(COMPOSE_BASE) \
 	$(if $(COMPOSE_PROD_ENV),--env-file $(COMPOSE_PROD_ENV),) \
 	-f infrastructure/docker-compose.prod.yml
 
-.PHONY: help up down restart logs ps build shell-backend shell-worker shell-db migrate test test-backend lint frontend-build prod-up prod-down prod-logs prod-migrate
+.PHONY: help up down restart logs ps build shell-backend shell-worker shell-db migrate test test-backend lint frontend-build prod-up prod-down prod-logs prod-migrate prod-deploy
 
 help:  ## list targets
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-18s %s\n", $$1, $$2}'
@@ -58,13 +58,15 @@ frontend-build: ## production build of the Next.js app (host-side)
 ## ---- production overlay ----
 prod-up:      ## start the prod stack
 	$(COMPOSE_PROD) up --build -d
-prod-down:    ## stop the prod stack (keeps volumes)
-	$(COMPOSE_PROD) down
-prod-restart: ## restart the prod stack
-	$(COMPOSE_PROD) restart
+prod-down:    ## stop the prod stack (keeps volumes; uses snap-docker unstick helper)
+	sudo bash infrastructure/prod-down.sh
+prod-restart: ## restart the prod stack (uses snap-docker unstick helper)
+	sudo bash infrastructure/prod-restart.sh
 prod-restart-app: ## restart only prod frontend + backend
-	$(COMPOSE_PROD) restart frontend backend
+	sudo bash infrastructure/prod-restart.sh frontend backend
 prod-logs:    ## tail prod logs
 	$(COMPOSE_PROD) logs -f --tail=200
 prod-migrate: ## alembic upgrade on prod stack (after deploy or new migrations)
 	$(COMPOSE_PROD) exec backend alembic upgrade head
+prod-deploy:  ## prod deploy with stuck-container cleanup (same as CI)
+	sudo bash infrastructure/deploy-prod.sh
