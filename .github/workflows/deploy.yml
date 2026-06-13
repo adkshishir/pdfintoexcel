@@ -46,7 +46,6 @@ jobs:
             git fetch --all --prune
             git checkout \"${{ github.ref_name }}\"
             git pull --ff-only
-            sudo make prod-up
-            sudo make prod-migrate
+            sudo bash infrastructure/deploy-prod.sh
           '"
 
