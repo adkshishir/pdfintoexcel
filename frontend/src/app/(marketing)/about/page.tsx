@@ -4,14 +4,15 @@ import Link from 'next/link';
 import { MarketingPageBody } from '@/components/exceflow/marketing-page-body';
 import { MarketingPageHeader } from '@/components/exceflow/marketing-page-header';
 import { AboutPageJsonLd } from '@/components/seo/about-page-json-ld';
+import { BreadcrumbJsonLd } from '@/components/seo/breadcrumb-json-ld';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { staticPageMetadata } from '@/lib/seo';
 
 export const metadata: Metadata = staticPageMetadata({
   path: '/about',
-  title: 'About us — pdfintoexcel',
+  title: 'About us',
   description:
-    'pdfintoexcel builds accurate PDF to Excel conversion with structure preservation and serious OCR for production workflows.',
+    'pdfintoexcel builds accurate PDF into Excel conversion with structure preservation and serious OCR for production workflows.',
 });
 
 const pillars = [
@@ -32,6 +33,12 @@ const pillars = [
 export default function AboutPage() {
   return (
     <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: 'Home', path: '/' },
+          { name: 'About', path: '/about' },
+        ]}
+      />
       <AboutPageJsonLd />
       <MarketingPageHeader
         eyebrow='Company'

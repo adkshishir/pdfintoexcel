@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { ArrowRight, Check, Shield } from 'lucide-react';
 
 import {
@@ -193,6 +194,7 @@ function HomePageContent() {
                   icon: '🔍',
                   title: 'Scanned PDF OCR',
                   desc: 'Built-in optical character recognition turns image-based and scanned PDFs into editable Excel data in over 25 languages.',
+                  href: '/scanned-pdf-to-excel',
                 },
                 {
                   icon: '🔢',
@@ -214,15 +216,31 @@ function HomePageContent() {
                   title: 'Private by default',
                   desc: 'Every transfer is encrypted, files are processed in isolation, and everything is automatically deleted within one hour.',
                 },
-              ].map((feature, idx) => (
-                <div
-                  key={idx}
-                  className='border-border rounded-2xl border bg-card p-6 transition-all hover:border-excel/40 hover:shadow-md'>
-                  <div className='mb-3 text-3xl'>{feature.icon}</div>
-                  <h3 className='text-foreground font-bold'>{feature.title}</h3>
-                  <p className='text-muted-foreground mt-2 text-sm'>{feature.desc}</p>
-                </div>
-              ))}
+              ].map((feature, idx) => {
+                const card = (
+                  <div
+                    className={cn(
+                      'border-border rounded-2xl border bg-card p-6 transition-all hover:border-excel/40 hover:shadow-md',
+                      feature.href && 'h-full',
+                    )}>
+                    <div className='mb-3 text-3xl'>{feature.icon}</div>
+                    <h3 className='text-foreground font-bold'>{feature.title}</h3>
+                    <p className='text-muted-foreground mt-2 text-sm'>{feature.desc}</p>
+                    {feature.href && (
+                      <span className='text-excel mt-3 inline-flex items-center gap-1 text-sm font-medium'>
+                        Learn more <ArrowRight className='size-3.5' />
+                      </span>
+                    )}
+                  </div>
+                );
+                return feature.href ? (
+                  <Link key={idx} href={feature.href} className='block h-full'>
+                    {card}
+                  </Link>
+                ) : (
+                  <div key={idx}>{card}</div>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -454,11 +472,13 @@ function HomePageContent() {
                   icon: '🏦',
                   title: 'Bank statements',
                   desc: 'Convert monthly statements into Excel for bookkeeping, reconciliation and expense tracking.',
+                  href: '/bank-statement-pdf-to-excel',
                 },
                 {
                   icon: '📋',
                   title: 'Invoices and receipts',
                   desc: 'Pull line items, quantities and totals out of supplier invoices and into your accounting sheet.',
+                  href: '/invoice-pdf-to-excel',
                 },
                 {
                   icon: '📊',
@@ -479,16 +499,33 @@ function HomePageContent() {
                   icon: '🔬',
                   title: 'Research and lab data',
                   desc: 'Convert scientific tables and survey results so you can run stats without manual entry.',
+                  href: '/research-data-pdf-to-excel',
                 },
-              ].map((usecase, idx) => (
-                <div
-                  key={idx}
-                  className='border-border rounded-2xl border bg-card p-6 transition-all hover:border-excel/50 hover:shadow-md'>
-                  <div className='mb-3 text-3xl'>{usecase.icon}</div>
-                  <h3 className='text-foreground font-bold'>{usecase.title}</h3>
-                  <p className='text-muted-foreground mt-2 text-sm'>{usecase.desc}</p>
-                </div>
-              ))}
+              ].map((usecase, idx) => {
+                const card = (
+                  <div
+                    className={cn(
+                      'border-border rounded-2xl border bg-card p-6 transition-all hover:border-excel/50 hover:shadow-md',
+                      usecase.href && 'h-full',
+                    )}>
+                    <div className='mb-3 text-3xl'>{usecase.icon}</div>
+                    <h3 className='text-foreground font-bold'>{usecase.title}</h3>
+                    <p className='text-muted-foreground mt-2 text-sm'>{usecase.desc}</p>
+                    {usecase.href && (
+                      <span className='text-excel mt-3 inline-flex items-center gap-1 text-sm font-medium'>
+                        Learn more <ArrowRight className='size-3.5' />
+                      </span>
+                    )}
+                  </div>
+                );
+                return usecase.href ? (
+                  <Link key={idx} href={usecase.href} className='block h-full'>
+                    {card}
+                  </Link>
+                ) : (
+                  <div key={idx}>{card}</div>
+                );
+              })}
             </div>
           </div>
         </section>

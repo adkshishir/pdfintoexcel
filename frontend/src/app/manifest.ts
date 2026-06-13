@@ -6,7 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: SITE_NAME,
     short_name: SITE_NAME,
-    description: 'Convert PDF to Excel with accurate table extraction and OCR.',
+    description: 'Convert PDF into Excel with accurate table extraction and OCR.',
     start_url: '/',
     display: 'standalone',
     background_color: '#ffffff',

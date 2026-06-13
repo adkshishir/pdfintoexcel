@@ -57,6 +57,7 @@ services:
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_API_BASE_URL: /api
+        NEXT_PUBLIC_GA_MEASUREMENT_ID: ${NEXT_PUBLIC_GA_MEASUREMENT_ID:-}
     command: !reset null   # use the image's CMD (next start), not the dev override
     volumes: !reset []     # no source mount in prod
     restart: unless-stopped
@@ -64,6 +65,7 @@ services:
       - "127.0.0.1:${HOST_PORT_FRONTEND:-4018}:3000"
     environment:
       NEXT_PUBLIC_API_BASE_URL: /api
+      NEXT_PUBLIC_GA_MEASUREMENT_ID: ${NEXT_PUBLIC_GA_MEASUREMENT_ID:-}
       # Server Components / Route Handlers call FastAPI from the Node container.
       INTERNAL_API_URL: http://backend:8000
       # Must match backend ANALYTICS_API_KEY; set in shell or `infrastructure/.env`.

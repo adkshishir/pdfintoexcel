@@ -14,7 +14,9 @@ COPY . .
 # Build with the same NEXT_PUBLIC_API_BASE_URL that runtime will use
 # (NEXT_PUBLIC_* vars are inlined at build time per Next.js 16 docs).
 ARG NEXT_PUBLIC_API_BASE_URL=/api
+ARG NEXT_PUBLIC_GA_MEASUREMENT_ID=
 ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
+ENV NEXT_PUBLIC_GA_MEASUREMENT_ID=$NEXT_PUBLIC_GA_MEASUREMENT_ID
 RUN npm run build
 
 FROM node:20-alpine AS runner

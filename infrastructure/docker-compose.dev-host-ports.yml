@@ -2,6 +2,9 @@
 # can choose different host bindings (e.g. 4017/4018) without merge conflicts.
 
 services:
+  postgres:
+    ports:
+      - "5433:5432"   # 5433 on host — avoids clash with a local Postgres on :5432
   backend:
     ports:
       - "8000:8000"

@@ -5,6 +5,8 @@ import ReactMarkdown from 'react-markdown';
 
 import { MarketingPageBody } from '@/components/exceflow/marketing-page-body';
 import { BreadcrumbJsonLd } from '@/components/seo/breadcrumb-json-ld';
+import { BlogPostCta } from '@/components/seo/blog-post-cta';
+import { HowToJsonLd, parseHowToStepsFromMarkdown } from '@/components/seo/how-to-json-ld';
 import { fetchPublishedPostBySlug } from '@/lib/blog';
 import { buildMetadata } from '@/lib/seo';
 import { cn } from '@/lib/utils';
@@ -63,6 +65,8 @@ export default async function BlogPostPage({ params }: Props) {
     : null;
 
   const readingMin = estimateReadingMinutes(post.body);
+  const howToSteps = parseHowToStepsFromMarkdown(post.body);
+  const showHowTo = howToSteps.length >= 2 && !post.schema_jsonld;
 
   return (
     <>
@@ -73,6 +77,14 @@ export default async function BlogPostPage({ params }: Props) {
           { name: post.title, path: `/blog/${slug}` },
         ]}
       />
+      {showHowTo && (
+        <HowToJsonLd
+          name={post.title}
+          description={post.meta_description}
+          steps={howToSteps}
+          path={`/blog/${slug}`}
+        />
+      )}
       <script
         type='application/ld+json'
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -114,6 +126,7 @@ export default async function BlogPostPage({ params }: Props) {
             '[&_ul]:my-4 [&_ul]:list-inside [&_ul]:list-disc',
           )}>
           <ReactMarkdown>{post.body}</ReactMarkdown>
+          <BlogPostCta />
         </article>
       </MarketingPageBody>
     </>

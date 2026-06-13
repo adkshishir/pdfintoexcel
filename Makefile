@@ -10,7 +10,7 @@ COMPOSE_PROD := $(COMPOSE_BASE) \
 	$(if $(COMPOSE_PROD_ENV),--env-file $(COMPOSE_PROD_ENV),) \
 	-f infrastructure/docker-compose.prod.yml
 
-.PHONY: help up down restart logs ps build shell-backend shell-worker shell-db migrate test test-backend lint frontend-build prod-up prod-down prod-logs prod-migrate
+.PHONY: help up down restart logs ps build shell-backend shell-worker shell-db migrate seed test test-backend lint frontend-build prod-up prod-down prod-logs prod-migrate
 
 help:  ## list targets
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-18s %s\n", $$1, $$2}'
@@ -44,6 +44,8 @@ shell-db:     ## psql into the postgres container
 ## ---- ops ----
 migrate:      ## run alembic upgrade head against the running stack
 	$(COMPOSE) exec backend alembic upgrade head
+seed:         ## idempotent DB seed (admin bootstrap + sample SEO content)
+	$(COMPOSE) exec backend python -m app.scripts.seed
 
 ## ---- tests ----
 test: test-backend ## run the full test suite

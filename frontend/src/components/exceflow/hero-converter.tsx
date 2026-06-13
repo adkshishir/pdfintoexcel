@@ -28,6 +28,7 @@ import type {
   ConverterOutputLayout,
 } from '@/lib/converter-types';
 import { useJobWebSocket } from '@/lib/use-job-websocket';
+import { trackConversionComplete, trackUploadStart } from '@/lib/analytics';
 import { cn } from '@/lib/utils';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? '/api';
@@ -297,6 +298,9 @@ export function HeroConverter() {
     onTerminal: (next) => {
       setJob(next);
       setPhase('result');
+      if (next.status === 'completed') {
+        trackConversionComplete(next.id);
+      }
       if (next.status === 'failed') {
         setError(next.error ?? 'Conversion failed');
       }
@@ -334,6 +338,7 @@ export function HeroConverter() {
 
   async function startConversion() {
     if (!file) return;
+    trackUploadStart(file.name);
     setUploading(true);
     setError(null);
     setJob(null);
@@ -392,7 +397,7 @@ export function HeroConverter() {
 
       <div className='rounded-2xl border-border border bg-card p-3 shadow-lg'>
         <div className='border-border flex items-center justify-between border-b px-3 py-3 text-sm text-muted-foreground'>
-          <span>PDF to Excel converter</span>
+          <span>PDF into Excel converter</span>
           <span
             className={cn(
               'inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold',

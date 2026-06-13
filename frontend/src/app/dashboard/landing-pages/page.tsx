@@ -12,9 +12,14 @@ export default async function LandingPagesDashboardPage() {
     <div className='space-y-4'>
       <div className='flex items-center justify-between'>
         <h1 className='text-2xl font-bold tracking-tight'>Landing Pages</h1>
-        <Button asChild className='rounded-lg'>
-          <Link href='/dashboard/site'>Generate internal links</Link>
-        </Button>
+        <div className='flex gap-2'>
+          <Button asChild variant='outline' className='rounded-lg'>
+            <Link href='/dashboard/site'>Internal link suggestions</Link>
+          </Button>
+          <Button asChild className='rounded-lg'>
+            <Link href='/dashboard/landing-pages/new'>New landing page</Link>
+          </Button>
+        </div>
       </div>
       <Card>
         <CardHeader>
@@ -28,9 +33,19 @@ export default async function LandingPagesDashboardPage() {
               {pages.map((p) => (
                 <li key={p.id} className='flex items-center justify-between rounded-lg border p-2'>
                   <span>
-                    /{p.slug} - {p.title}
+                    <Link href={`/${p.slug}`} className='text-primary hover:underline' target='_blank'>
+                      /{p.slug}
+                    </Link>{' '}
+                    — {p.title}
                   </span>
-                  <span className='text-muted-foreground'>{p.status}</span>
+                  <span className='flex items-center gap-3'>
+                    <span className='text-muted-foreground'>{p.status}</span>
+                    <Link
+                      href={`/dashboard/landing-pages/${p.id}/edit`}
+                      className='text-primary font-medium hover:underline'>
+                      Edit
+                    </Link>
+                  </span>
                 </li>
               ))}
             </ul>

@@ -5,21 +5,22 @@ import { HomeFaqJsonLd } from '@/components/seo/home-faq-json-ld';
 import { SITE_URL } from '@/lib/site-config';
 
 const title =
-  'Convert PDF to Excel Online — Free, Accurate Table Extraction | pdfintoexcel';
+  'Convert PDF into Excel Online — Free, Accurate Table Extraction | pdfintoexcel';
 const description =
-  'Convert PDF to Excel online with accurate table extraction. OCR for scanned PDFs, no sign-up, files auto-deleted in 1 hour. Download .xlsx in seconds.';
+  'Convert PDF into Excel online with accurate table extraction. OCR for scanned PDFs, no sign-up, files auto-deleted in 1 hour. PDF to Excel export in seconds.';
 
 export const metadata: Metadata = {
-  title,
+  title: { absolute: title },
   description,
   alternates: { canonical: SITE_URL },
   keywords: [
-    'convert PDF to Excel',
-    'PDF to Excel online',
+    'convert PDF into Excel',
+    'PDF into Excel online',
+    'PDF to Excel',
     'PDF to xlsx',
     'table extraction',
     'scanned PDF OCR',
-    'free PDF to Excel',
+    'free PDF into Excel',
     'pdfintoexcel',
   ],
   robots: { index: true, follow: true },

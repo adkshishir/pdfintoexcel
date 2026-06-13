@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og';
 
-export const alt = 'pdfintoexcel — PDF to Excel';
+export const alt = 'pdfintoexcel — Convert PDF into Excel';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -29,7 +29,7 @@ export default function OpenGraphImage() {
           pdfintoexcel
         </div>
         <div style={{ fontSize: 56, fontWeight: 700, lineHeight: 1.15, maxWidth: 900 }}>
-          Convert PDF to Excel with tables intact
+          Convert PDF into Excel with tables intact
         </div>
         <div style={{ fontSize: 26, marginTop: 24, opacity: 0.85, maxWidth: 800 }}>
           OCR for scans · No sign-up · Files deleted in 1 hour

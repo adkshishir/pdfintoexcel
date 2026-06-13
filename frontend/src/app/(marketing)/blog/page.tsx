@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { MarketingPageBody } from '@/components/exceflow/marketing-page-body';
 import { MarketingPageHeader } from '@/components/exceflow/marketing-page-header';
 import { BlogIndexJsonLd } from '@/components/seo/blog-index-json-ld';
+import { BreadcrumbJsonLd } from '@/components/seo/breadcrumb-json-ld';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { fetchPublishedPosts } from '@/lib/blog';
 import { staticPageMetadata } from '@/lib/seo';
@@ -12,9 +13,9 @@ export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = staticPageMetadata({
   path: '/blog',
-  title: 'Blog — pdfintoexcel',
+  title: 'Blog',
   description:
-    'Articles on PDF to Excel conversion, table reconstruction, OCR, and secure document handling.',
+    'Articles on PDF into Excel conversion, table reconstruction, OCR, and secure document handling.',
 });
 
 function formatDate(iso: string | null | undefined) {
@@ -33,6 +34,12 @@ export default async function BlogIndexPage() {
 
   return (
     <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: 'Home', path: '/' },
+          { name: 'Blog', path: '/blog' },
+        ]}
+      />
       <BlogIndexJsonLd posts={posts} />
       <MarketingPageHeader
         eyebrow='Resources'
