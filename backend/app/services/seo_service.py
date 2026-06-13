@@ -107,6 +107,22 @@ def list_landing_pages(db: Session) -> list[dict]:
     ]
 
 
+def get_landing_page(db: Session, page_id: str) -> dict | None:
+    row = db.get(LandingPage, uuid.UUID(page_id))
+    if row is None:
+        return None
+    return {
+        "id": str(row.id),
+        "slug": row.slug,
+        "title": row.title,
+        "body": row.body,
+        "faq_items": row.faq_items,
+        "internal_links": row.internal_links,
+        "status": row.status,
+        "updated_at": row.updated_at.isoformat(),
+    }
+
+
 def upsert_landing_page(db: Session, payload: dict) -> dict:
     page_id = payload.get("id")
     row = db.get(LandingPage, uuid.UUID(page_id)) if page_id else None

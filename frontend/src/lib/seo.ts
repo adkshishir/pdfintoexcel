@@ -20,7 +20,7 @@ export function buildMetadata(input: SeoInput): Metadata {
     ?.split(',')
     .map((s) => s.trim())
     .filter(Boolean);
-  const title = input.metaTitle?.trim() || `${input.title} - pdfintoexcel`;
+  const title = input.metaTitle?.trim() || input.title;
   const ogImages = input.ogImageUrl
     ? [input.ogImageUrl]
     : [{ url: DEFAULT_OG_PATH, width: 1200, height: 630, alt: 'pdfintoexcel' }];

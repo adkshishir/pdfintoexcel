@@ -3,6 +3,7 @@ import Link from 'next/link';
 
 import { MarketingPageBody } from '@/components/exceflow/marketing-page-body';
 import { MarketingPageHeader } from '@/components/exceflow/marketing-page-header';
+import { BreadcrumbJsonLd } from '@/components/seo/breadcrumb-json-ld';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   LEGAL_EMAIL,
@@ -14,7 +15,7 @@ import { staticPageMetadata } from '@/lib/seo';
 
 export const metadata: Metadata = staticPageMetadata({
   path: '/contact',
-  title: 'Contact — pdfintoexcel',
+  title: 'Contact',
   description:
     'Reach pdfintoexcel for product questions, partnerships, security reports, and support.',
 });
@@ -47,6 +48,12 @@ const contactChannels = [
 export default function ContactPage() {
   return (
     <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: 'Home', path: '/' },
+          { name: 'Contact', path: '/contact' },
+        ]}
+      />
       <MarketingPageHeader
         eyebrow='Contact'
         title='We are here to help'

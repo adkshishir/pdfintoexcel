@@ -4,12 +4,13 @@ import {
   LegalDocumentLayout,
   type LegalSection,
 } from '@/components/exceflow/legal-document-layout';
+import { BreadcrumbJsonLd } from '@/components/seo/breadcrumb-json-ld';
 import { LEGAL_LAST_UPDATED, SUPPORT_EMAIL } from '@/lib/site-config';
 import { staticPageMetadata } from '@/lib/seo';
 
 export const metadata: Metadata = staticPageMetadata({
   path: '/privacy',
-  title: 'Privacy Policy — pdfintoexcel',
+  title: 'Privacy Policy',
   description:
     'How pdfintoexcel handles personal data, uploaded files, retention, cookies, and subprocessors.',
 });
@@ -60,9 +61,12 @@ const sections: LegalSection[] = [
     title: 'Analytics and logs',
     content: (
       <p>
-        Standard server and application logs help us detect abuse, debug failures, and
-        measure reliability. Aggregated metrics (for example, job counts and error
-        rates) may be retained without document contents.
+        We use Google Analytics 4 (GA4) to understand how visitors find and use the
+        site — for example, which pages are viewed and whether uploads succeed.
+        GA4 may set cookies; you can opt out via your browser or a Google Analytics
+        opt-out add-on. Standard server and application logs help us detect abuse,
+        debug failures, and measure reliability. Aggregated metrics (for example,
+        job counts and error rates) may be retained without document contents.
       </p>
     ),
   },
@@ -123,11 +127,19 @@ const sections: LegalSection[] = [
 
 export default function PrivacyPage() {
   return (
-    <LegalDocumentLayout
+    <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: 'Home', path: '/' },
+          { name: 'Privacy Policy', path: '/privacy' },
+        ]}
+      />
+      <LegalDocumentLayout
       title='Privacy Policy'
       lead='How we handle personal data, uploaded files, and operational logs.'
       lastUpdated={LEGAL_LAST_UPDATED}
       sections={sections}
     />
+    </>
   );
 }

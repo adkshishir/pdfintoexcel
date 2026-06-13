@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.api.internal_auth import require_admin_user
@@ -62,6 +62,14 @@ def landing_pages(db: Session = Depends(get_db)) -> list[dict]:
 @router.post("/landing-pages")
 def save_landing_page(payload: dict, db: Session = Depends(get_db)) -> dict:
     return seo_service.upsert_landing_page(db, payload)
+
+
+@router.get("/landing-pages/{page_id}")
+def get_landing_page(page_id: str, db: Session = Depends(get_db)) -> dict:
+    row = seo_service.get_landing_page(db, page_id)
+    if row is None:
+        raise HTTPException(status_code=404, detail="landing page not found")
+    return row
 
 
 @router.get("/site/internal-links")

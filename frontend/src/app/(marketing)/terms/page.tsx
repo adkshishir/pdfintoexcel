@@ -4,12 +4,13 @@ import {
   LegalDocumentLayout,
   type LegalSection,
 } from '@/components/exceflow/legal-document-layout';
+import { BreadcrumbJsonLd } from '@/components/seo/breadcrumb-json-ld';
 import { LEGAL_EMAIL, LEGAL_LAST_UPDATED } from '@/lib/site-config';
 import { staticPageMetadata } from '@/lib/seo';
 
 export const metadata: Metadata = staticPageMetadata({
   path: '/terms',
-  title: 'Terms of Service — pdfintoexcel',
+  title: 'Terms of Service',
   description:
     'Terms governing use of pdfintoexcel PDF to Excel conversion and related services.',
 });
@@ -86,11 +87,19 @@ const sections: LegalSection[] = [
 
 export default function TermsPage() {
   return (
-    <LegalDocumentLayout
+    <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: 'Home', path: '/' },
+          { name: 'Terms of Service', path: '/terms' },
+        ]}
+      />
+      <LegalDocumentLayout
       title='Terms of Service'
       lead='Terms governing your use of pdfintoexcel and our conversion services.'
       lastUpdated={LEGAL_LAST_UPDATED}
       sections={sections}
     />
+    </>
   );
 }

@@ -37,13 +37,33 @@ export function SiteJsonLd() {
           priceCurrency: 'USD',
         },
         featureList: [
-          'PDF to Excel table extraction',
+          'PDF into Excel table extraction',
           'Scanned PDF OCR',
           'Merged cell preservation',
           'Multi-page and full-document export',
         ],
         description:
-          'Convert PDF to Excel with structure preservation. Tables, scans, and full-document export.',
+          'Convert PDF into Excel with structure preservation. Tables, scans, and full-document export.',
+      },
+      {
+        '@type': 'SoftwareApplication',
+        '@id': `${SITE_URL}/#software`,
+        name: 'pdfintoexcel',
+        applicationCategory: 'BusinessApplication',
+        operatingSystem: 'Web',
+        url: SITE_URL,
+        offers: {
+          '@type': 'Offer',
+          price: '0',
+          priceCurrency: 'USD',
+        },
+        featureList: [
+          'PDF into Excel conversion',
+          'OCR for scanned PDFs',
+          'Bank statement and invoice table extraction',
+        ],
+        description:
+          'Free online tool to convert PDF into Excel with accurate table reconstruction.',
       },
     ],
   };

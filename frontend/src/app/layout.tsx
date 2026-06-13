@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import localFont from 'next/font/local';
 
 import { ExceflowThemeProvider } from '@/components/exceflow/exceflow-theme-provider';
+import { GoogleAnalytics } from '@/components/seo/google-analytics';
 import { SiteJsonLd } from '@/components/seo/site-json-ld';
 import { TooltipProvider } from '@/components/ui/tooltip';
 
@@ -26,16 +27,17 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL('https://pdfintoexcel.com'),
   title: {
-    default: 'pdfintoexcel — PDF to Excel',
+    default: 'pdfintoexcel — Convert PDF into Excel',
     template: '%s | pdfintoexcel',
   },
   description:
-    'Convert digital, scanned, and handwritten PDFs into structured Excel files.',
+    'Convert PDF into Excel online with accurate table extraction. OCR for scanned PDFs; also supports PDF to Excel export.',
   keywords: [
     'pdfintoexcel',
+    'PDF into Excel',
     'PDF to Excel',
-    'convert PDF',
-    'Convert PDF to Excel for free',
+    'convert PDF into Excel',
+    'convert PDF to Excel',
     'table extraction',
     'OCR PDF',
     'spreadsheet',
@@ -48,17 +50,17 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     siteName: 'pdfintoexcel',
-    title: 'pdfintoexcel — PDF to Excel',
+    title: 'pdfintoexcel — Convert PDF into Excel',
     description:
-      'Accurate PDF to Excel conversion with layout preservation for tables and scans.',
+      'Accurate PDF into Excel conversion with layout preservation for tables and scans.',
     url: 'https://pdfintoexcel.com',
     images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'pdfintoexcel' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'pdfintoexcel — PDF to Excel',
+    title: 'pdfintoexcel — Convert PDF into Excel',
     description:
-      'Accurate PDF to Excel conversion with layout preservation for tables and scans.',
+      'Accurate PDF into Excel conversion with layout preservation for tables and scans.',
     images: ['/opengraph-image'],
   },
   manifest: '/manifest.webmanifest',
@@ -83,6 +85,7 @@ export default function RootLayout({
         />
       </head>
       <body className='flex min-h-screen flex-col'>
+        <GoogleAnalytics />
         <SiteJsonLd />
         <ExceflowThemeProvider>
           <TooltipProvider delayDuration={300}>{children}</TooltipProvider>

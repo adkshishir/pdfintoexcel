@@ -1,7 +1,7 @@
 /** Shared FAQ copy for homepage UI and FAQPage JSON-LD (must match). */
 export const HOME_FAQ_ITEMS = [
   {
-    q: 'Is converting PDF to Excel free?',
+    q: 'Is converting PDF into Excel free?',
     a: 'Yes. You can convert PDF into Excel free, with no account needed to start. Larger files, batch conversion and unlimited daily conversions are available on a paid plan.',
   },
   {
