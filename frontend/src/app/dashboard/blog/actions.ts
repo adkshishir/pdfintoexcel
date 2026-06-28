@@ -91,6 +91,36 @@ export async function updateBlogPostAction(
   redirect(`/dashboard/blog/${id}/edit`);
 }
 
+export type GenerateBlogState = { error?: string } | null;
+
+export async function generateBlogPostAction(
+  _prev: GenerateBlogState,
+  formData: FormData,
+): Promise<GenerateBlogState> {
+  const topic = String(formData.get('topic') ?? '').trim();
+  const body: Record<string, string> = {};
+  if (topic) {
+    body.topic = topic;
+  }
+  const res = await adminFetch(`${getInternalApiBase()}/admin/blog/generate`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    return { error: (await res.text()) || res.statusText };
+  }
+  const data = (await res.json()) as {
+    post: { id: string; slug: string };
+    quality_warnings: string[];
+  };
+  revalidatePath('/blog');
+  revalidatePath('/dashboard/blog');
+  const warn = data.quality_warnings.length
+    ? `?generated=1&warnings=${encodeURIComponent(data.quality_warnings.join('|'))}`
+    : '?generated=1';
+  redirect(`/dashboard/blog/${data.post.id}/edit${warn}`);
+}
+
 export async function deleteBlogPostAction(formData: FormData): Promise<void> {
   const id = String(formData.get('id') ?? '');
   if (!id) {

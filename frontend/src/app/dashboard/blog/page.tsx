@@ -25,6 +25,9 @@ export default async function DashboardBlogListPage() {
             <Button variant='outline' className='rounded-xl' asChild>
               <Link href='/dashboard'>Analytics</Link>
             </Button>
+            <Button variant='outline' className='rounded-xl' asChild>
+              <Link href='/dashboard/blog/generate'>Generate draft</Link>
+            </Button>
             <Button className='rounded-xl' asChild>
               <Link href='/dashboard/blog/new'>New post</Link>
             </Button>

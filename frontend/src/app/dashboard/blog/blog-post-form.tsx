@@ -2,9 +2,9 @@
 
 import { useActionState } from 'react';
 import { useState } from 'react';
-import ReactMarkdown from 'react-markdown';
 
-import type { AdminBlogPost } from '@/app/dashboard/blog/data';
+import type { AdminBlogPost, BlogCategoryItem } from '@/app/dashboard/blog/data';
+import { MarkdownBody } from '@/components/markdown-body';
 import { Button } from '@/components/ui/button';
 
 import {
@@ -17,13 +17,14 @@ const field =
   'border-input bg-background text-foreground focus-visible:ring-ring w-full rounded-xl border px-3 py-2 text-sm shadow-sm focus-visible:ring-2 focus-visible:outline-none';
 
 type Props =
-  | { mode: 'create' }
-  | { mode: 'edit'; post: AdminBlogPost };
+  | { mode: 'create'; categories: BlogCategoryItem[] }
+  | { mode: 'edit'; post: AdminBlogPost; categories: BlogCategoryItem[] };
 
 export function BlogPostForm(props: Props) {
   const formAction = props.mode === 'create' ? createBlogPostAction : updateBlogPostAction;
   const [state, action, pending] = useActionState(formAction, null as BlogFormState);
   const post = props.mode === 'edit' ? props.post : null;
+  const categories = props.categories;
   const [previewBody, setPreviewBody] = useState(post?.body ?? '');
 
   return (
@@ -110,7 +111,7 @@ export function BlogPostForm(props: Props) {
           <div>
             <p className='text-foreground mb-1.5 block text-sm font-medium'>Live preview</p>
             <div className='border-input prose prose-sm max-w-none rounded-xl border p-3'>
-              <ReactMarkdown>{previewBody || '_No content yet_'}</ReactMarkdown>
+              <MarkdownBody>{previewBody || '_No content yet_'}</MarkdownBody>
             </div>
           </div>
         </div>
@@ -128,9 +129,20 @@ export function BlogPostForm(props: Props) {
         </div>
         <div>
           <label htmlFor='category_id' className='text-foreground mb-1.5 block text-sm font-medium'>
-            Category ID (optional)
+            Category
           </label>
-          <input id='category_id' name='category_id' defaultValue={post?.category_id ?? ''} className={field} />
+          <select
+            id='category_id'
+            name='category_id'
+            defaultValue={post?.category_id ?? ''}
+            className={field}>
+            <option value=''>— None —</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
         </div>
         <div>
           <label htmlFor='tag_ids' className='text-foreground mb-1.5 block text-sm font-medium'>

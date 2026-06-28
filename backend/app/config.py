@@ -67,6 +67,15 @@ class Settings(BaseSettings):
     ocr_default_tesseract_lang: str = "eng"
     ocr_default_paddle_lang: str = "en"
 
+    # --- blog generation ---
+    blog_llm_provider: Literal["gemini", "openai", "anthropic"] = "gemini"
+    gemini_api_key: str = ""
+    gemini_model: str = "gemini-2.0-flash"
+    openai_api_key: str = ""
+    openai_model: str = "gpt-4.1"
+    anthropic_api_key: str = ""
+    anthropic_model: str = "claude-sonnet-4-20250514"
+
 
 @lru_cache
 def get_settings() -> Settings:

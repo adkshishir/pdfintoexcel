@@ -6,16 +6,18 @@ import { MarketingPageHeader } from '@/components/exceflow/marketing-page-header
 import { BlogIndexJsonLd } from '@/components/seo/blog-index-json-ld';
 import { BreadcrumbJsonLd } from '@/components/seo/breadcrumb-json-ld';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { fetchPublishedPosts } from '@/lib/blog';
+import { BLOG_CATEGORY_LABELS, type BlogCategorySlug } from '@/lib/blog-content-strategy.data';
 import { staticPageMetadata } from '@/lib/seo';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 export const metadata: Metadata = staticPageMetadata({
   path: '/blog',
-  title: 'Blog',
+  title: 'PDF to Excel Guides & Tutorials',
   description:
-    'Articles on PDF into Excel conversion, table reconstruction, OCR, and secure document handling.',
+    'Practical guides, tutorials and workflows for converting PDF into Excel — table extraction, OCR, bank statements, invoices, and more.',
 });
 
 function formatDate(iso: string | null | undefined) {
@@ -66,13 +68,21 @@ export default async function BlogIndexPage() {
                 <li key={post.slug}>
                   <Card className='transition-shadow hover:shadow-md'>
                     <CardHeader>
-                      {dateLabel && (
-                        <time
-                          dateTime={dateRaw ?? undefined}
-                          className='text-muted-foreground text-xs font-medium'>
-                          {dateLabel}
-                        </time>
-                      )}
+                      <div className='flex flex-wrap items-center gap-2'>
+                        {dateLabel && (
+                          <time
+                            dateTime={dateRaw ?? undefined}
+                            className='text-muted-foreground text-xs font-medium'>
+                            {dateLabel}
+                          </time>
+                        )}
+                        {post.category_slug && (
+                          <Badge variant='secondary' className='text-xs'>
+                            {BLOG_CATEGORY_LABELS[post.category_slug as BlogCategorySlug] ??
+                              post.category_slug}
+                          </Badge>
+                        )}
+                      </div>
                       <CardTitle className='text-xl'>
                         <Link
                           href={`/blog/${post.slug}`}

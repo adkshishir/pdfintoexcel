@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "pdfintoexcel Docs": {
+      "command": "npx",
+      "args": ["mcp-remote", "https://gitmcp.io/adkshishir/pdfintoexcel"]
+    }
+  }
+}

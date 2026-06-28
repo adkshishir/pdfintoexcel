@@ -39,7 +39,8 @@ from sqlalchemy import select
 
 from app.models.blog_post import BlogPost
 from app.models.database import session_scope
-from app.models.seo import LandingPage
+from app.models.seo import BlogCategory, LandingPage
+from app.services.blog_content_strategy import BLOG_CATEGORY_LABELS, BLOG_CATEGORY_SLUGS
 from app.schemas.blog import BlogPostCreate
 from app.services import auth_service, blog_service
 from app.scripts.seo_content import LANDING_PAGES, SEO_BLOG_POSTS
@@ -73,11 +74,28 @@ _SAMPLE_POSTS: tuple[BlogPostCreate, ...] = (
 )
 
 
+def _seed_blog_categories(db) -> None:
+    for slug in BLOG_CATEGORY_SLUGS:
+        existing = db.scalar(select(BlogCategory).where(BlogCategory.slug == slug))
+        if existing:
+            continue
+        db.add(
+            BlogCategory(
+                name=BLOG_CATEGORY_LABELS[slug],
+                slug=slug,
+            )
+        )
+    db.commit()
+
+
 def run_seed() -> None:
     _upgrade_schema_to_head()
 
     with session_scope() as db:
         auth_service.ensure_bootstrap_admin(db)
+
+    with session_scope() as db:
+        _seed_blog_categories(db)
 
     with session_scope() as db:
         for sample in _SAMPLE_POSTS:

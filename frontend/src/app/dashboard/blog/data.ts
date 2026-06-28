@@ -3,6 +3,22 @@ import 'server-only';
 import { adminFetch } from '@/lib/admin-auth';
 import { getInternalApiBase } from '@/lib/internal-api';
 
+export type BlogCategoryItem = {
+  id: string;
+  slug: string;
+  name: string;
+};
+
+export type NextTopicResponse = {
+  topic: string;
+  primary_keyword: string;
+  category_slug: string;
+  is_comparison: boolean;
+  comparison_targets: string[];
+  category_id: string | null;
+  rationale: string;
+};
+
 export type AdminBlogListItem = {
   id: string;
   slug: string;
@@ -35,6 +51,22 @@ export type AdminBlogPost = {
   published_at: string | null;
   updated_at: string | null;
 };
+
+export async function fetchAdminBlogCategories(): Promise<BlogCategoryItem[] | null> {
+  const res = await adminFetch(`${getInternalApiBase()}/admin/blog/categories`);
+  if (!res.ok) {
+    return null;
+  }
+  return (await res.json()) as BlogCategoryItem[];
+}
+
+export async function fetchNextBlogTopic(): Promise<NextTopicResponse | null> {
+  const res = await adminFetch(`${getInternalApiBase()}/admin/blog/next-topic`);
+  if (!res.ok) {
+    return null;
+  }
+  return (await res.json()) as NextTopicResponse;
+}
 
 export async function fetchAdminBlogPosts(): Promise<AdminBlogListItem[] | null> {
   const res = await adminFetch(`${getInternalApiBase()}/admin/blog/posts`);

@@ -86,4 +86,6 @@ class BlogPost(Base):
         }
 
     def to_admin_detail_dict(self) -> dict[str, Any]:
-        return self.to_public_dict()
+        out = self.to_public_dict()
+        out["category_id"] = str(self.category_id) if self.category_id else None
+        return out

@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 
-import { fetchAdminBlogPost } from '../../data';
+import { fetchAdminBlogPost, fetchAdminBlogCategories } from '../../data';
 import { BlogPostForm } from '../../blog-post-form';
 import { DeletePostButton } from './delete-post-button';
 
@@ -11,7 +11,10 @@ type Props = { params: Promise<{ id: string }> };
 
 export default async function EditBlogPostPage({ params }: Props) {
   const { id } = await params;
-  const post = await fetchAdminBlogPost(id);
+  const [post, categories] = await Promise.all([
+    fetchAdminBlogPost(id),
+    fetchAdminBlogCategories(),
+  ]);
   if (!post) {
     notFound();
   }
@@ -38,7 +41,7 @@ export default async function EditBlogPostPage({ params }: Props) {
             <Link href='/dashboard/blog'>All posts</Link>
           </Button>
         </div>
-        <BlogPostForm mode='edit' post={post} />
+        <BlogPostForm mode='edit' post={post} categories={categories ?? []} />
         <div className='border-border mt-12 border-t pt-8'>
           <h2 className='text-foreground text-sm font-semibold'>Danger zone</h2>
           <p className='text-muted-foreground mt-1 text-sm'>

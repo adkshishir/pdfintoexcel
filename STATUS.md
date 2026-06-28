@@ -124,6 +124,7 @@ Growth and editorial layer on top of the shipped converter — **still evolving*
 
 - **Admin auth** — JWT access + refresh for the dashboard (`app/api/admin_auth.py`, `app/services/auth_service.py`, `app/models/admin_user.py`). Refresh token rotation and logout/revocation paths.
 - **Public + admin blog** — `app/api/blog.py` (published only) and `app/api/admin_blog.py` (CRUD, drafts, search). Post fields extended for SEO and scheduling (e.g. meta title, `scheduled_at`, cover image, robots directives) with ORM and migrations aligned in `0008_blog_posts_ensure_columns`.
+- **Blog generation** — LLM draft pipeline from `pdfintoexcel-blog-content-strategy.md`: `blog_content_strategy.py`, `blog_topic_picker.py`, `blog_generator.py`, `llm_client.py`; admin `GET /next-topic`, `POST /generate`, CLI `app.scripts.generate_blog_post`; dashboard `/dashboard/blog/generate`. See `docs/seo/blog-generation.md`.
 - **SEO data model** — `app/models/seo.py`: `SeoMeta`, structured `SchemaDocument`, internal links, optional site settings, **landing pages** (`LandingPage` with body, FAQ JSON, internal links). Admin APIs in `app/api/admin_seo.py` + `app/services/seo_service.py`.
 - **Public landing API** — `app/api/landing.py` lists and resolves **published** landing pages by slug for the marketing site.
 - **Analytics** — `app/api/analytics.py` + `app/services/analytics_service.py` expose richer overview, time series, and top-page metrics for the internal dashboard.
@@ -143,6 +144,7 @@ Growth and editorial layer on top of the shipped converter — **still evolving*
 **Tests**
 
 - `backend/tests/test_admin_auth_and_blog.py` — login, refresh rotation, logout, draft vs published visibility, slug conflicts, list/search, delete.
+- `backend/tests/test_blog_generation.py` — strategy helpers, topic picker, quality check, mocked LLM generate endpoint.
 - Older sections above quote **point-in-time** test counts; the backend suite has **grown** (80+ `test_*` functions across `backend/tests/`). Authoritative count: run `pytest` in CI or after `pip install -r backend/requirements.txt`.
 
 **Infra / worker**

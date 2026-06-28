@@ -58,6 +58,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
+    site: '@pdfintoexcel',
     title: 'pdfintoexcel — Convert PDF into Excel',
     description:
       'Accurate PDF into Excel conversion with layout preservation for tables and scans.',
@@ -78,6 +79,10 @@ export default function RootLayout({
   return (
     <html lang='en' className={inter.variable} suppressHydrationWarning>
       <head>
+        <link rel='preconnect' href='https://www.googletagmanager.com' />
+        <link rel='dns-prefetch' href='https://www.googletagmanager.com' />
+        <link rel='preconnect' href='https://www.google-analytics.com' />
+        <link rel='dns-prefetch' href='https://www.google-analytics.com' />
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var t=localStorage.getItem('theme');var d=t==='dark'||(t!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.classList.toggle('dark',d)}catch(e){}})();`,

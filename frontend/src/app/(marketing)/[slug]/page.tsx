@@ -31,7 +31,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const page = await fetchLanding(slug);
   if (!page) return {};
-  const description = page.body.replace(/[#*_`[\]]/g, ' ').slice(0, 155).trim();
+  const rawDesc = page.body
+    .replace(/^#+\s*/gm, '')
+    .replace(/[*_`!|>[\]()]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 155)
+    .trim();
+  const description = rawDesc || `${page.title} — Convert PDF into Excel online.`;
   return buildMetadata({
     title: page.title,
     description,

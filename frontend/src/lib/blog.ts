@@ -7,6 +7,7 @@ export type BlogListItem = {
   slug: string;
   title: string;
   meta_description: string;
+  category_slug: string | null;
   published_at: string | null;
   updated_at: string | null;
 };

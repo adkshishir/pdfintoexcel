@@ -4,8 +4,8 @@ import { fetchPublishedPosts } from '@/lib/blog';
 import { getInternalApiBase } from '@/lib/internal-api';
 import { STATIC_SITEMAP_LAST_MODIFIED } from '@/lib/seo';
 
-/** Avoid calling the API during `next build` (no backend in the image build container). */
-export const dynamic = 'force-dynamic';
+/** Regenerate at most once per hour; not pre-built at build time because backend is absent. */
+export const revalidate = 3600;
 
 const site = 'https://pdfintoexcel.com';
 
