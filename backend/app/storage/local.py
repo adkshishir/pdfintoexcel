@@ -36,6 +36,11 @@ class LocalObjectStore(ObjectStore):
     def get(self, key: str) -> bytes:
         return self._path(key).read_bytes()
 
+    def iter_bytes(self, key: str, *, chunk_size: int = 1 << 20) -> Iterator[bytes]:
+        with self._path(key).open("rb") as fh:
+            while chunk := fh.read(chunk_size):
+                yield chunk
+
     def delete(self, key: str) -> None:
         path = self._path(key)
         if path.exists():

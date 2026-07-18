@@ -7,6 +7,7 @@ COMPOSE      := $(COMPOSE_BASE) \
 # Optional `infrastructure/compose.host-ports.env` sets HOST_PORT_BACKEND / HOST_PORT_FRONTEND.
 COMPOSE_PROD_ENV := $(wildcard infrastructure/compose.host-ports.env)
 COMPOSE_PROD := $(COMPOSE_BASE) \
+	--env-file infrastructure/.env.prod \
 	$(if $(COMPOSE_PROD_ENV),--env-file $(COMPOSE_PROD_ENV),) \
 	-f infrastructure/docker-compose.prod.yml
 

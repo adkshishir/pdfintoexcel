@@ -42,17 +42,6 @@ services:
 
   worker:
     restart: unless-stopped
-    # Recycle the worker child to reclaim leaked memory before the 6g cap bites.
-    command:
-      - celery
-      - -A
-      - app.queue.celery_app
-      - worker
-      - --loglevel=INFO
-      - --max-tasks-per-child=50
-      - --max-memory-per-child=4000000   # KB (~3.8G): soft-recycle after a task, below the 6g hard cap
-    mem_limit: 6g
-    memswap_limit: 6g   # ponytail: hard cap, no swap -> runaway PDF dies in-container not on host. raise if legit OCR jobs OOM
     env_file:
       - .env.prod
 

@@ -43,6 +43,30 @@ class _FakeS3Client:
         self.objects.pop((Bucket, Key), None)
         self.delete_calls.append((Bucket, Key))
 
+    def get_object(self, *, Bucket, Key):  # noqa: N803
+        if (Bucket, Key) not in self.objects:
+            raise self.exceptions.NoSuchKey
+        data = self.objects[(Bucket, Key)]
+
+        class _Body:
+            def __init__(self, payload: bytes) -> None:
+                self._payload = payload
+                self._pos = 0
+
+            def read(self, amt: int | None = None) -> bytes:
+                if amt is None:
+                    chunk = self._payload[self._pos :]
+                    self._pos = len(self._payload)
+                    return chunk
+                chunk = self._payload[self._pos : self._pos + amt]
+                self._pos += len(chunk)
+                return chunk
+
+            def close(self) -> None:
+                return None
+
+        return {"Body": _Body(data)}
+
 
 @pytest.fixture
 def store_with_fake() -> tuple[OracleObjectStore, _FakeS3Client]:
@@ -91,6 +115,15 @@ def test_open_local_yields_temp_file_and_cleans_up(store_with_fake, tmp_path):
     # File deleted on context exit.
     assert seen_path is not None
     assert not seen_path.exists()
+
+
+def test_iter_bytes_streams_chunks(store_with_fake):
+    store, fake = store_with_fake
+    payload = b"x" * 5
+    store.put("outputs/job1/output.xlsx", BytesIO(payload))
+    chunks = list(store.iter_bytes("outputs/job1/output.xlsx", chunk_size=2))
+    assert b"".join(chunks) == payload
+    assert chunks == [b"xx", b"xx", b"x"]
 
 
 def test_lazy_client_construction():

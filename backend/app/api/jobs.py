@@ -29,6 +29,7 @@ from app.models.job import (
 from app.queue.tasks import process_job
 from app.services import job_service
 from app.storage import get_storage
+from app.utils.http_headers import content_disposition_attachment
 from app.utils.security import looks_like_pdf
 
 router = APIRouter(prefix="/jobs", tags=["jobs"])
@@ -113,15 +114,10 @@ def download(job_id: uuid.UUID, db: Session = Depends(get_db)) -> StreamingRespo
     job_service.record_download(db, job_id)
 
     storage = get_storage()
-    data = storage.get(job.output_url)
-
     out_name = (job.filename.rsplit(".", 1)[0] if "." in job.filename else job.filename) + ".xlsx"
 
-    def stream():
-        yield data
-
     return StreamingResponse(
-        stream(),
+        storage.iter_bytes(job.output_url),
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={"Content-Disposition": f'attachment; filename="{out_name}"'},
+        headers={"Content-Disposition": content_disposition_attachment(out_name)},
     )

@@ -100,6 +100,25 @@ def test_upload_runs_lifecycle_to_completed(client):
     assert dl.content[:2] == b"PK"
 
 
+def test_download_unicode_filename(client):
+    pdf_bytes = _make_minimal_pdf()
+    unicode_name = "प्रदेश कृषि डायरी, २०८३ (1).pdf"
+    r = client.post(
+        "/api/jobs",
+        files={"file": (unicode_name, io.BytesIO(pdf_bytes), "application/pdf")},
+        data={"mode": "fast"},
+    )
+    assert r.status_code == 202, r.text
+    job_id = r.json()["id"]
+
+    dl = client.get(f"/api/jobs/{job_id}/download")
+    assert dl.status_code == 200, dl.text
+    assert dl.headers["content-type"].startswith("application/vnd.openxml")
+    assert "filename*=" in dl.headers["content-disposition"]
+    dl.headers["content-disposition"].encode("latin-1")
+    assert dl.content[:2] == b"PK"
+
+
 def test_rejects_non_pdf(client):
     r = client.post(
         "/api/jobs",

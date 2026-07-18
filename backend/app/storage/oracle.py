@@ -70,6 +70,15 @@ class OracleObjectStore(ObjectStore):
         self._get_client().download_fileobj(self.bucket, key, buf)
         return buf.getvalue()
 
+    def iter_bytes(self, key: str, *, chunk_size: int = 1 << 20) -> Iterator[bytes]:
+        response = self._get_client().get_object(Bucket=self.bucket, Key=key)
+        body = response["Body"]
+        try:
+            while chunk := body.read(chunk_size):
+                yield chunk
+        finally:
+            body.close()
+
     def delete(self, key: str) -> None:
         client = self._get_client()
         try:

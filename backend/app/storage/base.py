@@ -25,6 +25,10 @@ class ObjectStore(ABC):
         ...
 
     @abstractmethod
+    def iter_bytes(self, key: str, *, chunk_size: int = 1 << 20) -> Iterator[bytes]:
+        """Yield object bytes in chunks for streaming downloads."""
+
+    @abstractmethod
     def delete(self, key: str) -> None:
         ...
 

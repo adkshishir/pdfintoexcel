@@ -1,6 +1,8 @@
 'use client';
 
 import type { RefObject } from 'react';
+import { useState } from 'react';
+import { Loader2 } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -46,6 +48,75 @@ function ExceflowDlRow({ k, v }: { k: string; v: string }) {
         {v}
       </dd>
     </>
+  );
+}
+
+function outputFilename(filename: string): string {
+  const base = filename.includes('.')
+    ? filename.slice(0, filename.lastIndexOf('.'))
+    : filename;
+  return `${base}.xlsx`;
+}
+
+function DownloadButton({
+  downloadHref,
+  downloadFilename,
+  downloadRef,
+}: {
+  downloadHref: string;
+  downloadFilename: string;
+  downloadRef?: RefObject<HTMLAnchorElement | null>;
+}) {
+  const [downloading, setDownloading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleDownload() {
+    if (downloading) return;
+    setDownloading(true);
+    setError(null);
+    try {
+      const res = await fetch(downloadHref);
+      if (!res.ok) {
+        throw new Error(`Download failed (${res.status})`);
+      }
+      const blob = await res.blob();
+      if (!blob.size) {
+        throw new Error('Downloaded file is empty');
+      }
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = downloadFilename;
+      anchor.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Download failed');
+    } finally {
+      setDownloading(false);
+    }
+  }
+
+  return (
+    <div className='flex flex-col gap-2'>
+      <Button
+        type='button'
+        className='w-full rounded-xl bg-excel text-excel-foreground hover:opacity-95 sm:w-auto'
+        disabled={downloading}
+        onClick={() => void handleDownload()}>
+        {downloading ? (
+          <>
+            <Loader2 className='mr-2 size-4 animate-spin' />
+            Preparing download…
+          </>
+        ) : (
+          'Download .xlsx'
+        )}
+      </Button>
+      <a ref={downloadRef} href={downloadHref} className='sr-only' tabIndex={-1}>
+        Download
+      </a>
+      {error && <p className='text-destructive text-xs'>{error}</p>}
+    </div>
   );
 }
 
@@ -141,13 +212,11 @@ function JobPanelBody({
         </p>
       )}
       {downloadHref && (
-        <Button
-          asChild
-          className='w-full rounded-xl bg-excel text-excel-foreground hover:opacity-95 sm:w-auto'>
-          <a ref={downloadRef} href={downloadHref} download>
-            Download .xlsx
-          </a>
-        </Button>
+        <DownloadButton
+          downloadHref={downloadHref}
+          downloadFilename={outputFilename(job.filename)}
+          downloadRef={downloadRef}
+        />
       )}
     </>
   );
