@@ -68,6 +68,13 @@ def process_job(self, job_id: str) -> dict:  # noqa: ANN001
              tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False) as tmp:
             tmp_path = Path(tmp.name)
 
+        def _report_progress(stage: str, pct: int | None = None, extra: dict | None = None) -> None:
+            try:
+                with session_scope() as s:
+                    job_service.mark_progress(s, jid, stage=stage, progress_pct=pct, extra=extra)
+            except Exception:
+                log.warning("progress update failed for job %s (stage=%s)", jid, stage, exc_info=True)
+
         try:
             result = run_pipeline(
                 input_path,
@@ -78,6 +85,7 @@ def process_job(self, job_id: str) -> dict:  # noqa: ANN001
                 full_document_pages=full_document_pages,
                 trust_pdf_text=trust_pdf_text,
                 image_export=image_export,
+                progress=_report_progress,
             )
             with tmp_path.open("rb") as fh:
                 storage.put(out_key, fh, content_type=

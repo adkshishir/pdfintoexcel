@@ -10,7 +10,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.blog_post import BlogPost
-from app.models.seo import BlogPostTag
+from app.models.seo import BlogCategory, BlogPostTag
 from app.schemas.blog import BlogPostCreate
 
 
@@ -22,6 +22,17 @@ def normalize_slug(raw: str) -> str:
     s = raw.strip().lower()
     s = re.sub(r"\s+", "-", s)
     return s
+
+
+def category_slug_map(db: Session) -> dict[uuid.UUID, str]:
+    return {
+        row.id: row.slug
+        for row in db.scalars(select(BlogCategory)).all()
+    }
+
+
+def list_categories(db: Session) -> list[BlogCategory]:
+    return list(db.scalars(select(BlogCategory).order_by(BlogCategory.slug)).all())
 
 
 def list_published(db: Session) -> list[BlogPost]:

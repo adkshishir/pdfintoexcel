@@ -51,7 +51,7 @@ For multi-page statements, each detected table can export to its own sheet or me
 - If the scan is skewed, straighten it before upload for better OCR.
 - Check the confidence sheet in accurate mode when reconciling high-value accounts.
 
-Related: [invoice PDF to Excel](/invoice-pdf-to-excel) · [Blog: bank statement guide](/blog/bank-statement-pdf-to-excel)
+Related: [invoice PDF to Excel](/invoice-pdf-to-excel) · [scanned bank statements](/scanned-pdf-to-excel)
 """,
         faq_items=[
             {
@@ -62,11 +62,19 @@ Related: [invoice PDF to Excel](/invoice-pdf-to-excel) · [Blog: bank statement 
                 "q": "Will running balances stay in the right column?",
                 "a": "We target structural fidelity — dates, amounts, and balances land in separate columns when the source PDF has a clear table grid.",
             },
+            {
+                "q": "Is there a file size limit for bank statement PDFs?",
+                "a": "You can upload PDFs up to 50 MB on the free tier. Larger files and batch conversions are available on paid plans.",
+            },
+            {
+                "q": "How are multi-page bank statements handled?",
+                "a": "Each page maps to its own sheet by default. You can also merge consecutive table pages into one sheet at upload time.",
+            },
         ],
         internal_links=[
             {"href": "/", "label": "Convert PDF into Excel free"},
             {"href": "/invoice-pdf-to-excel", "label": "Invoice PDF to Excel"},
-            {"href": "/blog/bank-statement-pdf-to-excel", "label": "How-to: bank statement conversion"},
+            {"href": "/scanned-pdf-to-excel", "label": "Scanned bank statements (OCR)"},
         ],
     ),
     LandingSeed(
@@ -84,7 +92,7 @@ Related: [invoice PDF to Excel](/invoice-pdf-to-excel) · [Blog: bank statement 
 
 Upload at the [homepage converter](/). Use **Tables only** for a single line-item grid, or **Full document** when the invoice mixes metadata and tables on one page.
 
-See also our guide on [free invoice PDF to Excel conversion](/blog/pdf-invoice-to-excel-free).
+See also: [bank statement PDF to Excel](/bank-statement-pdf-to-excel) · [scanned PDF to Excel](/scanned-pdf-to-excel).
 """,
         faq_items=[
             {
@@ -95,11 +103,15 @@ See also our guide on [free invoice PDF to Excel conversion](/blog/pdf-invoice-t
                 "q": "Can I convert multiple invoices at once?",
                 "a": "Upload one PDF at a time on the free tier. Each multi-page PDF can contain several invoice tables on separate sheets.",
             },
+            {
+                "q": "Will line-item totals export as numbers?",
+                "a": "Yes. Quantities, unit prices, and line totals are exported as real numeric values so your formulas work immediately.",
+            },
         ],
         internal_links=[
             {"href": "/", "label": "Try the converter"},
             {"href": "/bank-statement-pdf-to-excel", "label": "Bank statement PDF to Excel"},
-            {"href": "/blog/pdf-invoice-to-excel-free", "label": "Invoice conversion tutorial"},
+            {"href": "/research-data-pdf-to-excel", "label": "Research data PDF to Excel"},
         ],
     ),
     LandingSeed(
@@ -107,32 +119,89 @@ See also our guide on [free invoice PDF to Excel conversion](/blog/pdf-invoice-t
         title="Scanned PDF to Excel (OCR)",
         body="""Image-based and scanned PDFs need OCR before table reconstruction. pdfintoexcel runs optical character recognition, then rebuilds rows and columns geometrically — the same pipeline we use for digital PDFs.
 
-## When to use scanned mode
+## When to use OCR mode
 
-Choose **Scanned (OCR)** when your PDF is a photo, scan, or print-to-PDF from a flatbed. Native text PDFs should stay on **Normal PDF** for faster, more accurate results.
+Choose **Scanned (OCR)** when your PDF falls into any of these categories:
+
+- **Photos of documents** — photos of receipts, invoices, or forms taken with a phone camera
+- **Flatbed scanner output** — PDFs created by scanning physical paper on a multifunction printer or document scanner
+- **Print-to-PDF from paper** — PDFs that were printed and then re-scanned, common in older archives
+- **Fax archives** — digital fax PDFs that contain only raster images, not selectable text
+- **Image-only PDFs** — PDFs generated from image files (JPEG, PNG, TIFF) where no text layer was embedded
+
+If you can highlight and copy text in your PDF viewer, use **Normal PDF** mode instead — it is faster and more direct. If you cannot select any text, OCR is required.
+
+## Supported OCR languages
+
+Our OCR engine recognises tables in these languages out of the box:
+
+| Language | Code |
+|----------|------|
+| English | en |
+| Spanish | es |
+| French | fr |
+| German | de |
+| Italian | it |
+| Portuguese | pt |
+| Dutch | nl |
+| Russian | ru |
+| Chinese (Simplified) | zh-cn |
+| Chinese (Traditional) | zh-tw |
+| Japanese | ja |
+| Korean | ko |
+| Arabic | ar |
+| Hindi | hi |
+| Bengali | bn |
+| Turkish | tr |
+| Polish | pl |
+| Swedish | sv |
+| Danish | da |
+| Finnish | fi |
+| Norwegian | nb |
+| Czech | cs |
+| Romanian | ro |
+| Hungarian | hu |
+| Thai | th |
+| Vietnamese | vi |
+| Greek | el |
+
+Select the matching language in the converter's advanced settings to improve character recognition for your document's language.
 
 ## OCR + table extraction workflow
 
 1. Upload the scanned PDF at [pdfintoexcel](/).
 2. Select **Scanned (OCR)** and **Accurate** mode for complex tables.
-3. Download Excel with typed numeric columns where OCR confidence is high.
+3. Set the document language in advanced settings when the source is non-English.
+4. Download Excel with typed numeric columns where OCR confidence is high.
 
-Read the full tutorial: [extract tables from scanned PDF](/blog/extract-tables-scanned-pdf).
+For best results, ensure the scanned page is straight, well-lit, and table borders are clearly visible.
 """,
         faq_items=[
             {
                 "q": "Which languages does OCR support?",
-                "a": "We support 25+ languages for scanned table extraction.",
+                "a": "We support 27 languages including English, Spanish, French, German, Chinese, Japanese, Arabic, and more. Select the document language in advanced settings before converting.",
             },
             {
                 "q": "Will merged header cells survive OCR?",
                 "a": "Yes. After OCR, our reconstructor preserves merged regions when the grid lines or column alignment are visible.",
             },
+            {
+                "q": "Can I convert a poorly lit or skewed scanned PDF?",
+                "a": "It depends on severity. Straighten skewed pages before uploading for best results. Poor lighting that obscures table borders may reduce column detection accuracy.",
+            },
+            {
+                "q": "How does OCR mode differ from Normal mode?",
+                "a": "Normal mode extracts text directly from the PDF's digital text layer. OCR mode first runs optical character recognition to create a text layer, then runs the same geometric table reconstruction pipeline. OCR is slower but necessary for image-based documents.",
+            },
+            {
+                "q": "What DPI should I use for scanning tables?",
+                "a": "We recommend 300 DPI for typical documents. Higher DPI (400–600) may improve accuracy on dense tables with small text but increases upload and processing time.",
+            },
         ],
         internal_links=[
             {"href": "/", "label": "Convert scanned PDF into Excel"},
-            {"href": "/blog/extract-tables-scanned-pdf", "label": "Scanned PDF table extraction guide"},
             {"href": "/bank-statement-pdf-to-excel", "label": "Bank statements from scans"},
+            {"href": "/invoice-pdf-to-excel", "label": "Invoice PDF to Excel (OCR)"},
         ],
     ),
     LandingSeed(
@@ -151,7 +220,7 @@ Read the full tutorial: [extract tables from scanned PDF](/blog/extract-tables-s
 
 Use **Tables only** when the PDF is mostly data grids. Use **Full document** when you need section headings plus inline tables on one sheet.
 
-More detail: [PDF research data to Excel](/blog/pdf-research-data-to-excel).
+See also: [scanned PDF to Excel](/scanned-pdf-to-excel) · [bank statement PDF to Excel](/bank-statement-pdf-to-excel).
 """,
         faq_items=[
             {
@@ -165,8 +234,8 @@ More detail: [PDF research data to Excel](/blog/pdf-research-data-to-excel).
         ],
         internal_links=[
             {"href": "/", "label": "Convert research PDF into Excel"},
-            {"href": "/blog/pdf-research-data-to-excel", "label": "Research data conversion guide"},
             {"href": "/scanned-pdf-to-excel", "label": "Scanned journal PDFs (OCR)"},
+            {"href": "/invoice-pdf-to-excel", "label": "Invoice PDF to Excel"},
         ],
     ),
 )

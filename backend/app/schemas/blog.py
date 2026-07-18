@@ -34,8 +34,36 @@ class BlogPostPublicListItem(BaseModel):
     slug: str
     title: str
     meta_description: str
+    category_slug: str | None = None
     published_at: str | None
     updated_at: str | None
+
+
+class BlogCategoryItem(BaseModel):
+    id: str
+    slug: str
+    name: str
+
+
+class BlogTopicPickResponse(BaseModel):
+    topic: str
+    primary_keyword: str
+    category_slug: str
+    is_comparison: bool
+    comparison_targets: list[str]
+    category_id: str | None
+    rationale: str
+
+
+class BlogGenerateRequest(BaseModel):
+    topic: str | None = None
+    category_slug: str | None = None
+    is_comparison: bool | None = None
+
+
+class BlogGenerateResponse(BaseModel):
+    post: BlogPostDetail
+    quality_warnings: list[str] = Field(default_factory=list)
 
 
 class BlogPostAdminListItem(BaseModel):
@@ -66,6 +94,7 @@ class BlogPostDetail(BaseModel):
     robots_directives: str | None
     keywords: str | None
     cover_image_url: str | None
+    category_id: str | None = None
     schema_jsonld: dict | None
     status: str
     scheduled_at: str | None

@@ -13,7 +13,7 @@ export function BlogPostCta() {
         .xlsx file in seconds. No sign-up required to start.
       </p>
       <Button asChild variant='excel' className='mt-4 rounded-lg font-semibold'>
-        <Link href='/'>Try pdfintoexcel free</Link>
+        <Link href='/?utm_source=blog&utm_medium=article'>Try pdfintoexcel free</Link>
       </Button>
     </aside>
   );

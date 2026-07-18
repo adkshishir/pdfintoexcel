@@ -38,6 +38,8 @@ class Settings(BaseSettings):
     # --- queue ---
     redis_url: str = "redis://redis:6379/0"
     celery_concurrency: int = 2
+    celery_concurrency_processing: int = 2
+    celery_concurrency_housekeeping: int = 4
 
     # --- storage ---
     # "local" for dev / tests, "oracle" for prod (S3-compatible OCI Object Storage)
@@ -66,6 +68,15 @@ class Settings(BaseSettings):
     # Default OCR languages (see app.ocr.lang_resolve).
     ocr_default_tesseract_lang: str = "eng"
     ocr_default_paddle_lang: str = "en"
+
+    # --- blog generation ---
+    blog_llm_provider: Literal["gemini", "openai", "anthropic"] = "gemini"
+    gemini_api_key: str = ""
+    gemini_model: str = "gemini-2.0-flash"
+    openai_api_key: str = ""
+    openai_model: str = "gpt-4.1"
+    anthropic_api_key: str = ""
+    anthropic_model: str = "claude-sonnet-4-20250514"
 
 
 @lru_cache

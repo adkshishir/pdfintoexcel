@@ -1,14 +1,15 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import ReactMarkdown from 'react-markdown';
 
 import { MarketingPageBody } from '@/components/exceflow/marketing-page-body';
+import { MarkdownBody } from '@/components/markdown-body';
 import { BreadcrumbJsonLd } from '@/components/seo/breadcrumb-json-ld';
 import { BlogPostCta } from '@/components/seo/blog-post-cta';
 import { HowToJsonLd, parseHowToStepsFromMarkdown } from '@/components/seo/how-to-json-ld';
 import { fetchPublishedPostBySlug } from '@/lib/blog';
 import { buildMetadata } from '@/lib/seo';
+import { SITE_URL } from '@/lib/site-config';
 import { cn } from '@/lib/utils';
 
 type Props = { params: Promise<{ slug: string }> };
@@ -51,8 +52,17 @@ export default async function BlogPostPage({ params }: Props) {
     headline: post.title,
     description: post.meta_description,
     datePublished: post.published_at,
-    author: { '@type': 'Organization', name: 'pdfintoexcel' },
-    publisher: { '@type': 'Organization', name: 'pdfintoexcel' },
+    dateModified: post.updated_at ?? post.published_at,
+    image: post.og_image_url ?? `${SITE_URL}/opengraph-image`,
+    url: `${SITE_URL}/blog/${slug}`,
+    mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_URL}/blog/${slug}` },
+    author: { '@type': 'Organization', name: 'pdfintoexcel', url: SITE_URL },
+    publisher: {
+      '@type': 'Organization',
+      name: 'pdfintoexcel',
+      url: SITE_URL,
+      logo: { '@type': 'ImageObject', url: `${SITE_URL}/logo.png` },
+    },
   };
 
   const dateRaw = post.published_at ?? post.updated_at;
@@ -125,7 +135,7 @@ export default async function BlogPostPage({ params }: Props) {
             '[&_li]:mb-2 [&_strong]:font-semibold',
             '[&_ul]:my-4 [&_ul]:list-inside [&_ul]:list-disc',
           )}>
-          <ReactMarkdown>{post.body}</ReactMarkdown>
+          <MarkdownBody>{post.body}</MarkdownBody>
           <BlogPostCta />
         </article>
       </MarketingPageBody>

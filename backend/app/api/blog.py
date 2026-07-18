@@ -15,12 +15,14 @@ router = APIRouter(prefix="/blog", tags=["blog"])
 @router.get("/posts", response_model=list[BlogPostPublicListItem])
 def list_posts(db: Session = Depends(get_db)) -> list[BlogPostPublicListItem]:
     posts = blog_service.list_published(db)
+    cat_map = blog_service.category_slug_map(db)
     return [
         BlogPostPublicListItem(
             id=str(p.id),
             slug=p.slug,
             title=p.title,
             meta_description=p.meta_description,
+            category_slug=cat_map.get(p.category_id) if p.category_id else None,
             published_at=p.published_at.isoformat() if p.published_at else None,
             updated_at=p.updated_at.isoformat() if p.updated_at else None,
         )

@@ -12,6 +12,26 @@ import { cn } from '@/lib/utils';
 
 import type { ConverterJob, ConverterJobStatus } from '@/lib/converter-types';
 
+const STAGE_LABEL: Record<string, string> = {
+  detect: 'Analysing PDF…',
+  extract: 'Extracting text…',
+  ocr: 'Running OCR…',
+  reconstruct: 'Reconstructing tables…',
+  clean: 'Cleaning data…',
+  classify: 'Classifying content…',
+  export: 'Generating Excel…',
+  done: 'Done',
+  preprocess: 'Pre-processing sheets…',
+  convert: 'Converting to PDF…',
+  finalize: 'Finalising…',
+};
+
+function stageLabel(stage: string | null): string {
+  if (stage && STAGE_LABEL[stage]) return STAGE_LABEL[stage];
+  if (stage === 'done') return 'Done';
+  return stage ? `Working on ${stage}…` : 'Working on your file…';
+}
+
 const STATUS_LABEL: Record<ConverterJobStatus, string> = {
   pending: 'Pending',
   queued: 'Queued',
@@ -141,10 +161,13 @@ function JobPanelBody({
       {showProgress && (
         <div className='space-y-2'>
           <Progress
-            value={38}
+            value={job.progress_pct ?? 10}
             className='h-1.5 bg-muted [&>div>div]:animate-pulse'
           />
-          <p className='text-muted-foreground text-xs'>Working on your file…</p>
+          <p className='text-muted-foreground text-xs'>
+            {stageLabel(job.stage)}
+            {job.progress_pct != null && ` (${job.progress_pct}%)`}
+          </p>
         </div>
       )}
       <dl className='grid grid-cols-2 gap-x-6 gap-y-3 text-sm'>

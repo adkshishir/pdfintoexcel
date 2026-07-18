@@ -4,8 +4,8 @@ import { fetchPublishedPosts } from '@/lib/blog';
 import { getInternalApiBase } from '@/lib/internal-api';
 import { STATIC_SITEMAP_LAST_MODIFIED } from '@/lib/seo';
 
-/** Avoid calling the API during `next build` (no backend in the image build container). */
-export const dynamic = 'force-dynamic';
+/** Regenerate at most once per hour; not pre-built at build time because backend is absent. */
+export const revalidate = 3600;
 
 const site = 'https://pdfintoexcel.com';
 
@@ -47,8 +47,13 @@ const staticPages: MetadataRoute.Sitemap = [
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const posts = await fetchPublishedPosts();
-  const landingRes = await fetch(`${getInternalApiBase()}/landing-pages`, { next: { revalidate: 300 } });
-  const landing = landingRes.ok ? ((await landingRes.json()) as Array<{ slug: string; updated_at: string }>) : [];
+  let landing: Array<{ slug: string; updated_at: string }> = [];
+  try {
+    const landingRes = await fetch(`${getInternalApiBase()}/landing-pages`, { next: { revalidate: 300 } });
+    landing = landingRes.ok ? ((await landingRes.json()) as Array<{ slug: string; updated_at: string }>) : [];
+  } catch {
+    landing = [];
+  }
   const blogPosts: MetadataRoute.Sitemap = posts.map((p) => ({
     url: `${site}/blog/${p.slug}`,
     lastModified: p.updated_at ? new Date(p.updated_at) : new Date(),

@@ -44,6 +44,7 @@ def create_job(
     upload: BinaryIO,
     filename: str,
     size_bytes: int,
+    page_count: int | None = None,
     mode: JobMode = JobMode.FAST,
     output_layout: OutputLayout = OutputLayout.MERGED,
     extraction_scope: ExtractionScope = ExtractionScope.TABLES_ONLY,
@@ -75,6 +76,7 @@ def create_job(
         input_url=key,
         filename=filename,
         size_bytes=size_bytes,
+        page_count=page_count,
         created_at=_now(),
         expires_at=_now() + timedelta(seconds=settings.job_ttl_seconds),
     )
@@ -126,6 +128,27 @@ def mark_completed(
     job.pdf_type = pdf_type
     job.metrics = metrics
     db.commit()
+
+
+def mark_progress(
+    db: Session,
+    job_id: uuid.UUID,
+    *,
+    stage: str,
+    progress_pct: int | None = None,
+    extra: dict | None = None,
+) -> None:
+    """Update the job's current pipeline stage and progress."""
+    job = get_job(db, job_id)
+    if job is None:
+        return
+    job.stage = stage
+    if progress_pct is not None:
+        job.progress_pct = progress_pct
+    if extra is not None:
+        job.extra = {**(job.extra or {}), **extra}
+    db.commit()
+    notify_job_subscribers(db, job_id)
 
 
 def mark_failed(db: Session, job_id: uuid.UUID, *, error: str) -> None:

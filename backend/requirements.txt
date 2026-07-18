@@ -57,6 +57,11 @@ python-dateutil>=2.9.0   # already a transitive dep of pandas; made explicit her
 # --- OCR language auto-detect (sample PDF text layer → tess hints) ---
 langdetect==1.0.9
 
+# --- blog generation ---
+google-genai==1.16.1
+openai==1.59.6
+anthropic==0.42.0
+
 # --- dev ---
 pytest==8.3.4
 pytest-asyncio==0.25.0

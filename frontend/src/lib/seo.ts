@@ -30,6 +30,10 @@ export function buildMetadata(input: SeoInput): Metadata {
     keywords: kw && kw.length > 0 ? kw : undefined,
     alternates: input.canonicalUrl ? { canonical: input.canonicalUrl } : undefined,
     openGraph: {
+      type: 'website',
+      locale: 'en_US',
+      siteName: 'pdfintoexcel',
+      url: input.canonicalUrl ?? undefined,
       title: input.ogTitle ?? title,
       description: input.ogDescription ?? input.description,
       images: ogImages,

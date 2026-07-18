@@ -41,7 +41,7 @@ def test_trust_pdf_text_false_routes_digital_through_ocr(
 
     ocr_calls = {"n": 0}
 
-    def fake_extract_ocr(path, *, mode, page_indices=None, recognizer=None):  # noqa: ANN001
+    def fake_extract_ocr(path, *, mode, page_indices=None, recognizer=None, **kwargs):  # noqa: ANN001, ANN003
         ocr_calls["n"] += 1
         boxes = [
             WordBox("Item", 40, 40, 80, 10, page=0, confidence=0.95),

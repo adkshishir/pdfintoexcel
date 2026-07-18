@@ -24,6 +24,8 @@ export interface ConverterJob {
   size_bytes: number;
   page_count: number | null;
   pdf_type: string | null;
+  stage: string | null;
+  progress_pct: number | null;
   error: string | null;
   metrics: Record<string, unknown> | null;
   created_at: string;
