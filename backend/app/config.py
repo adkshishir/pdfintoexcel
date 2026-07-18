@@ -38,6 +38,8 @@ class Settings(BaseSettings):
     # --- queue ---
     redis_url: str = "redis://redis:6379/0"
     celery_concurrency: int = 2
+    celery_concurrency_processing: int = 2
+    celery_concurrency_housekeeping: int = 4
 
     # --- storage ---
     # "local" for dev / tests, "oracle" for prod (S3-compatible OCI Object Storage)

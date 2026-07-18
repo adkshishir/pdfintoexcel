@@ -35,10 +35,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .replace(/^#+\s*/gm, '')
     .replace(/[*_`!|>[\]()]/g, ' ')
     .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, 155)
     .trim();
-  const description = rawDesc || `${page.title} — Convert PDF into Excel online.`;
+  const truncated =
+    rawDesc.length > 156
+      ? rawDesc.slice(0, 153).replace(/\s+\S*$/, '') + '.'
+      : rawDesc;
+  const description = truncated || `${page.title} — Convert PDF into Excel online.`;
   return buildMetadata({
     title: page.title,
     description,

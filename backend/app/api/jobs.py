@@ -15,7 +15,6 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from app.api.limiter import limit_create_job, limit_download, limit_get_job
-from app.config import get_settings
 from app.models.database import get_db
 from app.models.job import (
     DocumentType,
@@ -30,6 +29,7 @@ from app.queue.tasks import process_job
 from app.services import job_service
 from app.storage import get_storage
 from app.utils.security import looks_like_pdf
+from app.utils.validators import ValidationError, validate_pdf
 
 router = APIRouter(prefix="/jobs", tags=["jobs"])
 
@@ -45,8 +45,6 @@ async def create_job(
     image_export: str = Form(default="none"),
     db: Session = Depends(get_db),
 ) -> dict[str, Any]:
-    settings = get_settings()
-
     if mode not in (JobMode.FAST, JobMode.ACCURATE):
         raise HTTPException(400, f"invalid mode: {mode}")
     if output_layout not in (OutputLayout.MERGED, OutputLayout.SPLIT):
@@ -60,7 +58,7 @@ async def create_job(
     if image_export not in (ImageExport.NONE, ImageExport.FIGURES, ImageExport.ONLY):
         raise HTTPException(400, f"invalid image_export: {image_export}")
 
-    head = await file.read(1024)
+    head = await file.read(8192)
     if not looks_like_pdf(head):
         raise HTTPException(415, "file is not a PDF")
 
@@ -69,18 +67,35 @@ async def create_job(
     total = 0
     while chunk := await file.read(1 << 20):
         total += len(chunk)
-        if total > settings.max_upload_bytes:
-            raise HTTPException(413, f"file exceeds {settings.max_upload_bytes} bytes")
         chunks.append(chunk)
 
+    raw_bytes = b"".join(chunks)
+
+    # Upfront validation — fail fast before enqueueing
+    import tempfile
+    from pathlib import Path
+    with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
+        tmp_path = Path(tmp.name)
+        tmp.write(raw_bytes)
+    try:
+        page_count = validate_pdf(tmp_path, total / (1024 * 1024))
+    except ValidationError as e:
+        tmp_path.unlink(missing_ok=True)
+        raise HTTPException(422, detail={"code": e.code, "message": e.message})
+    except Exception as e:
+        tmp_path.unlink(missing_ok=True)
+        raise HTTPException(422, detail={"code": "validation_error", "message": str(e)})
+    tmp_path.unlink(missing_ok=True)
+
     trust_pdf_text = document_type == DocumentType.NORMAL
-    body = io.BytesIO(b"".join(chunks))
+    body = io.BytesIO(raw_bytes)
 
     job = job_service.create_job(
         db,
         upload=body,
         filename=file.filename or "upload.pdf",
         size_bytes=total,
+        page_count=page_count,
         mode=JobMode(mode),
         output_layout=OutputLayout(output_layout),
         extraction_scope=ExtractionScope(extraction_scope),

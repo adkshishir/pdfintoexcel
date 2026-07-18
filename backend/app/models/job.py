@@ -91,6 +91,11 @@ class Job(Base):
     page_count: Mapped[int | None] = mapped_column(nullable=True)
     pdf_type: Mapped[str | None] = mapped_column(String(16), nullable=True)
 
+    stage: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    progress_pct: Mapped[int | None] = mapped_column(nullable=True)
+    file_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    extra: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+
     error: Mapped[str | None] = mapped_column(Text, nullable=True)
     # `JSON` is portable: JSONB on Postgres, TEXT-with-JSON-encoding elsewhere.
     metrics: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
@@ -127,8 +132,11 @@ class Job(Base):
             "size_bytes":   self.size_bytes,
             "page_count":   self.page_count,
             "pdf_type":     self.pdf_type,
+            "stage":        self.stage,
+            "progress_pct": self.progress_pct,
             "error":        self.error,
             "metrics":      self.metrics,
+            "extra":        self.extra,
             "download_count": self.download_count,
             "created_at":   self.created_at.isoformat() if self.created_at else None,
             "started_at":   self.started_at.isoformat() if self.started_at else None,

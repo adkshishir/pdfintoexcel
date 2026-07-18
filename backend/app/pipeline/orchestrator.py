@@ -12,11 +12,12 @@ Where RawTable[] comes from:
     hybrid    →  digital pages via Tier-1/Tier-2, scanned pages via OCR
 
 `mode` flag (`fast` | `accurate`):
-    - `accurate` raises OCR DPI (200 → 300, handled in ocr_pipeline).
+    - `accurate` uses adaptive DPI — tries 200 DPI + PaddleOCR per page;
+      if per-page confidence < 0.75, re-renders at 300 DPI + Tesseract.
     - `accurate` enables continuation merging (geometry-aware; now also
       applied in fast mode for obvious rowspan cases via the sparse-row
       signal added in Phase 10+).
-    - `fast` keeps continuation merging off for speed.
+    - `fast` keeps fixed 200 DPI and continuation merging off.
 
 `extraction_scope`:
     - `tables_only`   — structured table path (default).
@@ -45,6 +46,7 @@ from __future__ import annotations
 
 import logging
 import time
+from collections.abc import Callable
 from functools import partial
 from pathlib import Path
 
@@ -68,6 +70,8 @@ from app.table.reconstructor import reconstruct_tables
 
 log = logging.getLogger(__name__)
 
+ProgressReporter = Callable[[str, int | None, dict | None], None]
+
 
 def run_pipeline(
     pdf_path: Path,
@@ -79,6 +83,7 @@ def run_pipeline(
     full_document_pages: FullDocumentPages = "single_sheet",
     trust_pdf_text: bool = True,
     image_export: ImageExport = "none",
+    progress: ProgressReporter | None = None,
 ) -> PipelineResult:
     timings: dict[str, int] = {}
     export_metrics: dict = {}
@@ -106,11 +111,17 @@ def run_pipeline(
         "detected: type=%s pages=%s with_text=%s",
         detection.pdf_type, detection.page_count, detection.pages_with_text,
     )
+    if progress:
+        progress("detect", 0, {"pdf_type": detection.pdf_type, "page_count": detection.page_count})
+
+    if progress:
+        progress("extract", 10, {"total_pages": detection.page_count})
 
     boxes, page_count = _collect_boxes(
         pdf_path, detection, mode, timings,
         trust_pdf_text=trust_pdf_text,
         recognizer=ocr_recognizer,
+        progress=progress,
     )
 
     layout_row_count: int | None = None
@@ -130,10 +141,14 @@ def run_pipeline(
             )
         else:
             t_recon = time.time()
+            if progress:
+                progress("reconstruct", 40)
             raw = reconstruct_tables(table_boxes, page_count)
             timings["reconstruct_ms"] = _ms_since(t_recon)
         log.info("full_document reconstruct: %d tables", len(raw))
 
+        if progress:
+            progress("clean", 60, {"table_count": len(raw)})
         t_clean = time.time()
         clean = clean_tables(
             raw,
@@ -142,6 +157,8 @@ def run_pipeline(
         )
         timings["clean_ms"] = _ms_since(t_clean)
 
+        if progress:
+            progress("classify", 70)
         t_classify = time.time()
         content = classify_document(boxes, raw, clean, page_count, pdf_path=pdf_path)
         if full_document_pages == "per_page":
@@ -166,9 +183,10 @@ def run_pipeline(
     else:
         # --- tables_only path ---
 
+        if progress:
+            progress("reconstruct", 40)
+
         # 1. Detect footer words FIRST so they can be excluded from reconstruction.
-        #    This is the key fix: the geometry reconstructor never sees footer words,
-        #    so they cannot appear as spurious table rows on any page.
         t_fd = time.time()
         footer_word_ids, footer_lines = _detect_footer_words(pdf_path, boxes, page_count)
         timings["footer_detect_ms"] = _ms_since(t_fd)
@@ -186,10 +204,14 @@ def run_pipeline(
             )
         else:
             t_recon = time.time()
+            if progress:
+                progress("reconstruct", 50)
             raw = reconstruct_tables(table_boxes, page_count)
             timings["reconstruct_ms"] = _ms_since(t_recon)
         log.info("reconstruct: %d tables", len(raw))
 
+        if progress:
+            progress("clean", 60, {"table_count": len(raw)})
         t_clean = time.time()
         clean = clean_tables(
             raw,
@@ -199,6 +221,8 @@ def run_pipeline(
         timings["clean_ms"] = _ms_since(t_clean)
         log.info("clean: %d tables retained (layout=%s)", len(clean), output_layout)
 
+        if progress:
+            progress("export", 80, {"table_count": len(clean)})
         t_export = time.time()
         # Preamble uses the full boxes (footer words are fine in the header area).
         preamble_boxes, preamble_images = _extract_preamble(pdf_path, boxes, raw)
@@ -212,6 +236,9 @@ def run_pipeline(
             export_metrics=export_metrics,
         )
         timings["export_ms"] = _ms_since(t_export)
+
+    if progress:
+        progress("done", 100)
 
     mean_conf = (
         sum(b.confidence for b in boxes) / len(boxes) if boxes else 0.0
@@ -241,6 +268,8 @@ def _export_images_only(
     from app.pipeline.figures_sheet import append_figures_sheet_from_pdf
 
     detection = detect_pdf_type(pdf_path)
+    if progress:
+        progress("export", 10, {"pdf_type": detection.pdf_type, "page_count": detection.page_count})
     wb = Workbook()
     default = wb.active
     default.title = "empty"
@@ -272,13 +301,12 @@ def _collect_boxes(
     *,
     trust_pdf_text: bool,
     recognizer,
+    progress: Callable[[str, int | None, dict | None], None] | None = None,
 ) -> tuple[list[WordBox], int]:
     """Route each page to the right extraction source and combine."""
     if not trust_pdf_text:
-        # Some digital PDFs ship a broken Unicode mapping for non-Latin scripts
-        # while Latin text looks fine — render + OCR recovers glyphs users see.
         t = time.time()
-        boxes, page_count = extract_ocr(pdf_path, mode=mode, recognizer=recognizer)
+        boxes, page_count = extract_ocr(pdf_path, mode=mode, recognizer=recognizer, progress=progress)
         timings["ocr_ms"] = _ms_since(t)
         return boxes, page_count
 
@@ -290,11 +318,10 @@ def _collect_boxes(
 
     if detection.pdf_type == "scanned":
         t = time.time()
-        boxes, page_count = extract_ocr(pdf_path, mode=mode, recognizer=recognizer)
+        boxes, page_count = extract_ocr(pdf_path, mode=mode, recognizer=recognizer, progress=progress)
         timings["ocr_ms"] = _ms_since(t)
         return boxes, page_count
 
-    # hybrid
     text_pages = sorted(detection.text_page_indices)
     scan_pages = sorted(detection.scanned_page_indices())
     log.info(
@@ -310,6 +337,7 @@ def _collect_boxes(
         t = time.time()
         ocr_boxes, _ = extract_ocr(
             pdf_path, mode=mode, page_indices=list(scan_pages), recognizer=recognizer,
+            progress=progress,
         )
         timings["ocr_ms"] = _ms_since(t)
     else:
