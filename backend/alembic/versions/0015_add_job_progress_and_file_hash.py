@@ -1,7 +1,7 @@
 """Add stage, progress_pct, file_hash, extra columns to jobs table.
 
-Revision ID: 0015_add_job_progress_and_file_hash
-Revises: 0014_job_image_export
+Revision ID: 0015
+Revises: 0014
 Create Date: 2026-07-18
 """
 from __future__ import annotations
@@ -9,7 +9,7 @@ from __future__ import annotations
 import sqlalchemy as sa
 from alembic import op
 
-revision = "0015_add_job_progress_and_file_hash"
+revision = "0015"
 down_revision = "0014_job_image_export"
 branch_labels = None
 depends_on = None
