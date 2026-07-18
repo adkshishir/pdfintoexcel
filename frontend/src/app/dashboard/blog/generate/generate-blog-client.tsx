@@ -4,6 +4,7 @@ import { useActionState } from 'react';
 
 import type { NextTopicResponse } from '@/app/dashboard/blog/data';
 import { generateBlogPostAction, type GenerateBlogState } from '@/app/dashboard/blog/actions';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
@@ -73,7 +74,7 @@ export function GenerateBlogClient({ nextTopic }: Props) {
           {pending ? 'Generating draft…' : 'Generate draft'}
         </Button>
         <Button type='button' variant='outline' className='rounded-xl' asChild>
-          <a href='/dashboard/blog'>Cancel</a>
+          <Link href='/dashboard/blog'>Cancel</Link>
         </Button>
       </div>
     </form>

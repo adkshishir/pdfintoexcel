@@ -25,9 +25,14 @@ export type BlogPostPublic = BlogListItem & {
 };
 
 export async function fetchPublishedPosts(): Promise<BlogListItem[]> {
-  const res = await fetch(`${getInternalApiBase()}/blog/posts`, {
-    next: { revalidate: 60 },
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${getInternalApiBase()}/blog/posts`, {
+      next: { revalidate: 60 },
+    });
+  } catch {
+    return [];
+  }
   if (!res.ok) {
     return [];
   }
@@ -37,10 +42,15 @@ export async function fetchPublishedPosts(): Promise<BlogListItem[]> {
 export async function fetchPublishedPostBySlug(
   slug: string,
 ): Promise<BlogPostPublic | null> {
-  const res = await fetch(
-    `${getInternalApiBase()}/blog/posts/${encodeURIComponent(slug)}`,
-    { next: { revalidate: 60 } },
-  );
+  let res: Response;
+  try {
+    res = await fetch(
+      `${getInternalApiBase()}/blog/posts/${encodeURIComponent(slug)}`,
+      { next: { revalidate: 60 } },
+    );
+  } catch {
+    return null;
+  }
   if (res.status === 404) {
     return null;
   }

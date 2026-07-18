@@ -47,8 +47,13 @@ const staticPages: MetadataRoute.Sitemap = [
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const posts = await fetchPublishedPosts();
-  const landingRes = await fetch(`${getInternalApiBase()}/landing-pages`, { next: { revalidate: 300 } });
-  const landing = landingRes.ok ? ((await landingRes.json()) as Array<{ slug: string; updated_at: string }>) : [];
+  let landing: Array<{ slug: string; updated_at: string }> = [];
+  try {
+    const landingRes = await fetch(`${getInternalApiBase()}/landing-pages`, { next: { revalidate: 300 } });
+    landing = landingRes.ok ? ((await landingRes.json()) as Array<{ slug: string; updated_at: string }>) : [];
+  } catch {
+    landing = [];
+  }
   const blogPosts: MetadataRoute.Sitemap = posts.map((p) => ({
     url: `${site}/blog/${p.slug}`,
     lastModified: p.updated_at ? new Date(p.updated_at) : new Date(),
