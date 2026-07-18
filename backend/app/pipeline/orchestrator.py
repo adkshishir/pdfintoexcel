@@ -96,7 +96,7 @@ def run_pipeline(
     export_metrics["ocr_paddle_lang_effective"] = paddle_eff
 
     if image_export == "only":
-        return _export_images_only(pdf_path, output_path, export_metrics=export_metrics)
+        return _export_images_only(pdf_path, output_path, export_metrics=export_metrics, progress=progress)
 
     ocr_recognizer = partial(
         recognize_with_fallback,
@@ -260,6 +260,7 @@ def _export_images_only(
     output_path: Path,
     *,
     export_metrics: dict,
+    progress: ProgressReporter | None = None,
 ) -> PipelineResult:
     """Build a workbook containing only the Figures sheet (or a placeholder)."""
     from openpyxl import Workbook

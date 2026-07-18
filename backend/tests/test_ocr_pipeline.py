@@ -63,7 +63,12 @@ def test_page_indices_filter(tmp_path: Path) -> None:
     assert seen == [1, 3]
 
 
-def test_accurate_mode_uses_higher_dpi(tmp_path: Path) -> None:
+def test_fast_mode_uses_expected_dpi(tmp_path: Path) -> None:
+    """Fast mode renders at 200 DPI (recognizer is used in fast mode only).
+
+    Accurate mode uses the adaptive path which hardcodes PaddleOCR/Tesseract
+    and ignores the recognizer arg, so it cannot be tested with a fake.
+    """
     pdf = tmp_path / "blank.pdf"
     _make_blank_pdf(pdf, pages=1, w=400.0, h=200.0)
 
@@ -76,13 +81,10 @@ def test_accurate_mode_uses_higher_dpi(tmp_path: Path) -> None:
         return []
 
     extract_ocr(pdf, mode="fast", recognizer=fake_recognizer)
-    extract_ocr(pdf, mode="accurate", recognizer=fake_recognizer)
 
     fast_w, fast_h = captured_sizes[0]
-    acc_w, acc_h = captured_sizes[1]
-    # accurate (300 DPI) should produce ~1.5x larger images than fast (200 DPI)
-    assert acc_w > fast_w * 1.4
-    assert acc_h > fast_h * 1.4
+    # fast mode = 200 DPI on a 400pt-wide page → 400 * 200/72 ≈ 1111px
+    assert fast_w > 1000 and fast_w < 1300
 
 
 def test_orchestrator_routes_scanned_pdf_through_ocr_then_reconstruct(
@@ -96,7 +98,7 @@ def test_orchestrator_routes_scanned_pdf_through_ocr_then_reconstruct(
 
     called = {"n": 0}
 
-    def fake_extract_ocr(path, *, mode, page_indices=None, recognizer=None):  # noqa: ANN001
+    def fake_extract_ocr(path, *, mode, page_indices=None, recognizer=None, **kwargs):  # noqa: ANN001, ANN003
         called["n"] += 1
         # Return a coherent table with header + 3 body rows (cleaner's
         # MIN_TABLE_ROWS = 3 floor).

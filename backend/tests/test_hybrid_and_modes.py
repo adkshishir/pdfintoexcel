@@ -57,7 +57,7 @@ def test_hybrid_routes_each_page_correctly(tmp_path: Path, monkeypatch) -> None:
 
     seen_ocr_pages: list[list[int]] = []
 
-    def fake_extract_ocr(path, *, mode, page_indices=None, recognizer=None):  # noqa: ANN001
+    def fake_extract_ocr(path, *, mode, page_indices=None, recognizer=None, **kwargs):  # noqa: ANN001, ANN003
         seen_ocr_pages.append(list(page_indices) if page_indices is not None else [])
         # Return a coherent table for the OCR'd page so reconstruction can build it.
         target = (page_indices or [2])[0]

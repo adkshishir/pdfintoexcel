@@ -8,6 +8,15 @@ import pytest
 from fastapi.testclient import TestClient
 
 
+def _minimal_pdf_bytes() -> bytes:
+    import fitz
+    doc = fitz.open()
+    doc.new_page(width=200, height=200)
+    out = doc.tobytes()
+    doc.close()
+    return out
+
+
 @pytest.fixture(scope="module")
 def client(tmp_path_factory):
     storage_root = tmp_path_factory.mktemp("storage")
@@ -44,7 +53,7 @@ def client(tmp_path_factory):
 
 
 def test_api_accepts_extraction_scope_full_document(client) -> None:
-    pdf = b"%PDF-1.4\n" + b"x" * 200
+    pdf = _minimal_pdf_bytes()
     r = client.post(
         "/api/jobs",
         files={"file": ("x.pdf", io.BytesIO(pdf), "application/pdf")},
@@ -57,7 +66,7 @@ def test_api_accepts_extraction_scope_full_document(client) -> None:
 
 
 def test_api_accepts_full_document_per_page(client) -> None:
-    pdf = b"%PDF-1.4\n" + b"x" * 200
+    pdf = _minimal_pdf_bytes()
     r = client.post(
         "/api/jobs",
         files={"file": ("x.pdf", io.BytesIO(pdf), "application/pdf")},
@@ -72,7 +81,7 @@ def test_api_accepts_full_document_per_page(client) -> None:
 
 
 def test_api_default_extraction_scope_tables_only(client) -> None:
-    pdf = b"%PDF-1.4\n" + b"x" * 200
+    pdf = _minimal_pdf_bytes()
     r = client.post(
         "/api/jobs",
         files={"file": ("x.pdf", io.BytesIO(pdf), "application/pdf")},
@@ -84,7 +93,7 @@ def test_api_default_extraction_scope_tables_only(client) -> None:
 
 
 def test_api_rejects_invalid_full_document_pages(client) -> None:
-    pdf = b"%PDF-1.4\n" + b"x" * 200
+    pdf = _minimal_pdf_bytes()
     r = client.post(
         "/api/jobs",
         files={"file": ("x.pdf", io.BytesIO(pdf), "application/pdf")},
@@ -94,7 +103,7 @@ def test_api_rejects_invalid_full_document_pages(client) -> None:
 
 
 def test_api_rejects_invalid_extraction_scope(client) -> None:
-    pdf = b"%PDF-1.4\n" + b"x" * 200
+    pdf = _minimal_pdf_bytes()
     r = client.post(
         "/api/jobs",
         files={"file": ("x.pdf", io.BytesIO(pdf), "application/pdf")},
