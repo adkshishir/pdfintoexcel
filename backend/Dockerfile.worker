@@ -19,6 +19,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         # OpenCV runtime libs (libGL, libGthread) — pulled in by paddleocr
         libgl1 \
         libglib2.0-0 \
+        # OpenMP runtime — needed by paddlepaddle's native extension (core.so).
+        # Previously only pulled in transitively; pin it explicitly so it
+        # can't silently disappear if another package's deps change.
+        libgomp1 \
         # Build tools needed by some pip wheels
         gcc \
         curl \

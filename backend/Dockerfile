@@ -7,6 +7,12 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         libmagic1 \
+        # OpenCV runtime libs (libGL, libGthread) — needed by cv2/camelot,
+        # imported by app.ocr / app.pipeline even in the API image
+        libgl1 \
+        libglib2.0-0 \
+        # OpenMP runtime — needed by paddlepaddle's native extension (core.so)
+        libgomp1 \
         curl \
     && rm -rf /var/lib/apt/lists/*
 
